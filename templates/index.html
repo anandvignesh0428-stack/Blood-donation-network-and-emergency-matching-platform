@@ -1,0 +1,529 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Blood Donation Network</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f2f2f7;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 68px;
+            overflow-x: hidden;
+        }
+
+        /* HEADER */
+        .hdr {
+            background: linear-gradient(135deg, #c62828 0%, #b71c1c 100%);
+            padding: 12px 16px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .hdr-left { display: flex; align-items: center; gap: 8px; }
+        .hdr-logo { width: 30px; height: 30px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .hdr-name { color: white; font-size: 0.95rem; font-weight: 700; }
+        .hdr-right { display: flex; align-items: center; gap: 6px; }
+        .lang-sw {
+            display: flex;
+            background: rgba(255,255,255,0.18);
+            border-radius: 14px;
+            padding: 2px;
+        }
+        .lang-sw button {
+            padding: 5px 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: transparent;
+            color: rgba(255,255,255,0.7);
+            transition: all 0.25s;
+        }
+        .lang-sw button.on { background: white; color: #c62828; }
+
+        /* MAIN */
+        .main { max-width: 420px; margin: 0 auto; padding: 0 12px; }
+
+        /* HERO CARD */
+        .hero-card {
+            margin-top: 14px;
+            background: linear-gradient(135deg, #c62828 0%, #d32f2f 50%, #e53935 100%);
+            border-radius: 16px;
+            padding: 22px 18px 20px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-card::after {
+            content: '';
+            position: absolute;
+            right: -20px;
+            top: -20px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+        }
+        .hero-card::before {
+            content: '';
+            position: absolute;
+            right: 30px;
+            bottom: -30px;
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        .hero-row { display: flex; align-items: center; gap: 14px; position: relative; z-index: 1; }
+        .hero-drop-icon {
+            width: 52px;
+            height: 52px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            flex-shrink: 0;
+        }
+        .hero-text h2 { font-size: 1.15rem; font-weight: 700; line-height: 1.3; margin-bottom: 4px; }
+        .hero-text p { font-size: 0.72rem; color: rgba(255,255,255,0.8); line-height: 1.4; }
+
+        /* EMERGENCY BUTTON */
+        .emg-wrap { margin-top: 12px; }
+        .emg-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 14px 16px;
+            background: white;
+            border-radius: 14px;
+            text-decoration: none;
+            color: #c62828;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            transition: transform 0.15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .emg-btn:active { transform: scale(0.98); }
+        .emg-btn-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #c62828, #e53935);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 3px 10px rgba(198,40,40,0.3);
+        }
+        .emg-btn-text { flex: 1; }
+        .emg-btn-title { font-size: 0.9rem; font-weight: 700; color: #1a1a1a; }
+        .emg-btn-sub { font-size: 0.68rem; color: #999; margin-top: 1px; }
+        .emg-btn-arrow { color: #ccc; font-size: 1.1rem; }
+
+        /* QUICK ACTIONS */
+        .qa-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .qa-card {
+            background: white;
+            border-radius: 14px;
+            padding: 16px 12px;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+            transition: transform 0.15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .qa-card:active { transform: scale(0.97); }
+        .qa-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        .qa-icon.ic-red { background: #ffebee; }
+        .qa-icon.ic-blue { background: #e3f2fd; }
+        .qa-icon.ic-amber { background: #fff8e1; }
+        .qa-icon.ic-green { background: #e8f5e9; }
+        .qa-title { font-size: 0.8rem; font-weight: 700; color: #1a1a1a; margin-bottom: 2px; }
+        .qa-sub { font-size: 0.65rem; color: #999; line-height: 1.3; }
+
+        /* VOICE CARD */
+        .voice-card {
+            margin-top: 12px;
+            background: white;
+            border-radius: 14px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .voice-card:active { transform: scale(0.98); }
+        .vc-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .vc-text { flex: 1; }
+        .vc-title { font-size: 0.8rem; font-weight: 700; color: #1a1a1a; }
+        .vc-sub { font-size: 0.65rem; color: #999; margin-top: 1px; }
+        .vc-arrow { color: #ccc; font-size: 0.9rem; }
+
+        /* HOW IT WORKS */
+        .hw-section { margin-top: 18px; }
+        .hw-title { font-size: 0.7rem; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; padding-left: 2px; }
+        .hw-row { display: flex; gap: 8px; }
+        .hw-item {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            padding: 14px 8px;
+            text-align: center;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+        }
+        .hw-num {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #c62828;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.68rem;
+            font-weight: 700;
+            margin: 0 auto 6px;
+        }
+        .hw-icon { font-size: 1.1rem; margin-bottom: 4px; }
+        .hw-text { font-size: 0.62rem; color: #666; font-weight: 600; line-height: 1.3; }
+
+        /* FEATURES */
+        .ft-section { margin-top: 18px; margin-bottom: 16px; }
+        .ft-title { font-size: 0.7rem; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; padding-left: 2px; }
+        .ft-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .ft-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border-radius: 10px;
+            padding: 12px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.04);
+        }
+        .ft-icon { font-size: 1rem; flex-shrink: 0; }
+        .ft-text { font-size: 0.68rem; color: #555; font-weight: 600; line-height: 1.25; }
+
+        /* BOTTOM NAV */
+        .bnav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -1px 12px rgba(0,0,0,0.08);
+            display: flex;
+            z-index: 100;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .bnav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 2px 6px;
+            text-decoration: none;
+            color: #aaa;
+            font-size: 0.6rem;
+            font-weight: 600;
+            gap: 2px;
+            transition: color 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .bnav-item.on { color: #c62828; }
+        .bnav-item.on::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 24px;
+            height: 2px;
+            background: #c62828;
+            border-radius: 0 0 2px 2px;
+        }
+        .bnav-item { position: relative; }
+        .bnav-ico { font-size: 1.2rem; line-height: 1; }
+
+        /* API LINK */
+        .api-lnk {
+            display: block;
+            text-align: center;
+            padding: 10px;
+            color: #c62828;
+            text-decoration: none;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border-radius: 8px;
+            margin: 0 0 12px;
+            transition: background 0.2s;
+        }
+        .api-lnk:active { background: #ffebee; }
+    </style>
+</head>
+<body>
+
+<header class="hdr">
+    <div class="hdr-left">
+        <div class="hdr-logo">&#129656;</div>
+        <span class="hdr-name">Blood Donation Network</span>
+    </div>
+    <div class="hdr-right">
+        <div class="lang-sw">
+            <button id="langEn" class="on" onclick="setLang('en')">EN</button>
+            <button id="langTa" onclick="setLang('ta')">&#3000;&#3021;&#2965;</button>
+        </div>
+    </div>
+</header>
+
+<div class="main">
+
+    <div class="hero-card">
+        <div class="hero-row">
+            <div class="hero-drop-icon">&#129656;</div>
+            <div class="hero-text">
+                <h2 id="heroTitle">Blood Needed?<br><span id="heroHL">Find Help Fast.</span></h2>
+                <p id="heroSub">Connect patients with nearby compatible blood donors during emergencies.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="emg-wrap">
+        <a href="/emergency" class="emg-btn">
+            <div class="emg-btn-icon">&#129656;</div>
+            <div class="emg-btn-text">
+                <div class="emg-btn-title" id="emgTitle">Emergency Blood Request</div>
+                <div class="emg-btn-sub" id="emgSub">Speak in Tamil or English</div>
+            </div>
+            <div class="emg-btn-arrow">&#8250;</div>
+        </a>
+    </div>
+
+    <div class="qa-grid">
+        <a href="/donor" class="qa-card">
+            <div class="qa-icon ic-green">&#128100;</div>
+            <div class="qa-title" id="qaDonorT">Register Donor</div>
+            <div class="qa-sub" id="qaDonorS">Help someone in need</div>
+        </a>
+        <a href="/matching" class="qa-card">
+            <div class="qa-icon ic-blue">&#128269;</div>
+            <div class="qa-title" id="qaFindT">Find Blood Donor</div>
+            <div class="qa-sub" id="qaFindS">Search compatible donors</div>
+        </a>
+    </div>
+
+    <a href="/emergency" class="voice-card">
+        <div class="vc-icon">&#127908;</div>
+        <div class="vc-text">
+            <div class="vc-title" id="vcTitle">Voice Emergency Request</div>
+            <div class="vc-sub" id="vcSub">Speak in Tamil or English. No typing required.</div>
+        </div>
+        <div class="vc-arrow">&#8250;</div>
+    </a>
+
+    <div class="hw-section">
+        <div class="hw-title" id="hwTitle">How it works</div>
+        <div class="hw-row">
+            <div class="hw-item">
+                <div class="hw-num">1</div>
+                <div class="hw-icon">&#127908;</div>
+                <div class="hw-text" id="hw1">Speak</div>
+            </div>
+            <div class="hw-item">
+                <div class="hw-num">2</div>
+                <div class="hw-icon">&#129656;</div>
+                <div class="hw-text" id="hw2">Find Donor</div>
+            </div>
+            <div class="hw-item">
+                <div class="hw-num">3</div>
+                <div class="hw-icon">&#10084;&#65039;</div>
+                <div class="hw-text" id="hw3">Connect</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ft-section">
+        <div class="ft-title" id="ftTitle">Features</div>
+        <div class="ft-grid">
+            <div class="ft-item">
+                <span class="ft-icon">&#129656;</span>
+                <span class="ft-text" id="ft1">Blood Matching</span>
+            </div>
+            <div class="ft-item">
+                <span class="ft-icon">&#128205;</span>
+                <span class="ft-text" id="ft2">Location Based</span>
+            </div>
+            <div class="ft-item">
+                <span class="ft-icon">&#9889;</span>
+                <span class="ft-text" id="ft3">Emergency Ready</span>
+            </div>
+            <div class="ft-item">
+                <span class="ft-icon">&#128274;</span>
+                <span class="ft-text" id="ft4">Simple &amp; Secure</span>
+            </div>
+        </div>
+    </div>
+
+    <a href="/docs" class="api-lnk" id="apiLnk">API Documentation</a>
+
+</div>
+
+<nav class="bnav">
+    <a href="/" class="bnav-item on">
+        <span class="bnav-ico">&#127968;</span>
+        <span id="bnHome">Home</span>
+    </a>
+    <a href="/emergency" class="bnav-item">
+        <span class="bnav-ico">&#129656;</span>
+        <span id="bnEmg">Emergency</span>
+    </a>
+    <a href="/donor" class="bnav-item">
+        <span class="bnav-ico">&#128100;</span>
+        <span id="bnDonor">Donor</span>
+    </a>
+    <a href="/matching" class="bnav-item">
+        <span class="bnav-ico">&#128269;</span>
+        <span id="bnFind">Find</span>
+    </a>
+</nav>
+
+<script>
+
+var curLang = 'en';
+
+var T = {
+    en: {
+        heroTitle: 'Blood Needed?',
+        heroHL: 'Find Help Fast.',
+        heroSub: 'Connect patients with nearby compatible blood donors during emergencies.',
+        emgTitle: 'Emergency Blood Request',
+        emgSub: 'Speak in Tamil or English',
+        qaDonorT: 'Register Donor',
+        qaDonorS: 'Help someone in need',
+        qaFindT: 'Find Blood Donor',
+        qaFindS: 'Search compatible donors',
+        vcTitle: 'Voice Emergency Request',
+        vcSub: 'Speak in Tamil or English. No typing required.',
+        hwTitle: 'How it works',
+        hw1: 'Speak',
+        hw2: 'Find Donor',
+        hw3: 'Connect',
+        ftTitle: 'Features',
+        ft1: 'Blood Matching',
+        ft2: 'Location Based',
+        ft3: 'Emergency Ready',
+        ft4: 'Simple & Secure',
+        apiLnk: 'API Documentation',
+        bnHome: 'Home',
+        bnEmg: 'Emergency',
+        bnDonor: 'Donor',
+        bnFind: 'Find'
+    },
+    ta: {
+        heroTitle: '\u0B87\u0BB0\u0BA4\u0BCD\u0BA4\u0BAE\u0BCD \u0BA4\u0BC7\u0BB5\u0BC8\u0BAF\u0BBE?',
+        heroHL: '\u0BB5\u0BBF\u0BB0\u0BC8\u0BB5\u0BBE\u0B95\u0BBE \u0B89\u0BA4\u0BB5\u0BBF \u0BAA\u0BC6\u0BB1\u0BC1\u0B99\u0BCd\u0B95\u0BB3\u0BCD.',
+        heroSub: '\u0B85\u0BB5\u0B9A\u0BB0 \u0B9A\u0BA8\u0BCd\u0BA4\u0BB0\u0BCD\u0BAA\u0BBE\u0B9F\u0BCD\u0B9F\u0BBF\u0BB2\u0BCD \u0B87\u0BB0\u0BCd\u0BA4\u0BCd\u0BA4\u0BC1 \u0BAA\u0BCA\u0BB0\u0BC1\u0BA4\u0BCd\u0B95\u0BC1\u0B95\u0BB3\u0BCD \u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95\u0B9F\u0BCd\u0B9F\u0BBF \u0B89\u0BB1\u0BBF\u0BAA\u0BBE\u0BB0\u0BCd\u0B9F\u0BC1\u0B99\u0BCd\u0B95.',
+        emgTitle: '\u0B85\u0BB5\u0B9A\u0BB0 \u0B87\u0BB0\u0BA4\u0BCd\u0BA4 \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95',
+        emgSub: '\u0BA4\u0BC6\u0BAE\u0BBF\u0BB4\u0BCD \u0B85\u0BB2\u0BCd\u0BB2\u0BA4\u0BC1 \u0B86\u0B99\u0BCd\u0B95\u0BBF\u0BB2\u0BA4\u0BCd\u0BA4\u0BBF\u0BB2\u0BCD',
+        qaDonorT: '\u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF \u0BAE\u0BB1\u0BBF\u0B9F\u0BAA\u0BCD\u0BAA\u0BBF\u0BB1\u0BC1\u0B99\u0BCd\u0B95',
+        qaDonorS: '\u0BAF\u0BBE\u0BB0\u0BC1\u0B95\u0BCd\u0B95\u0BC1 \u0B89\u0BA4\u0BB5\u0BBF \u0B9A\u0BC6\u0BB2\u0BCD',
+        qaFindT: '\u0B87\u0BB0\u0BCd\u0BA4\u0BCd\u0B9F\u0BC1 \u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF',
+        qaFindS: '\u0BAA\u0BCA\u0BB0\u0BC1\u0B9A\u0BBF\u0BA4\u0BAE\u0BCD \u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF\u0B95\u0BB3\u0BCD \u0BA4\u0BC7\u0B9F\u0BC1',
+        vcTitle: '\u0B95\u0BC1\u0BB1\u0BB2\u0BC1 \u0B85\u0BB5\u0B9A\u0BB0 \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95',
+        vcSub: '\u0BA4\u0BC6\u0BAE\u0BBF\u0BB4\u0BCD \u0B85\u0BB2\u0BCd\u0BB2\u0BA4\u0BC1 \u0B86\u0B99\u0BCd\u0B95\u0BBF\u0BB2\u0BA4\u0BCd\u0BA4\u0BBF\u0BB2\u0BCD \u0BAA\u0BC7\u0B9A\u0BC1\u0B99\u0BCd\u0B95. \u0BA4\u0B9F\u0BCd\u0B9F\u0B9A\u0BCd\u0B9A\u0BC1 \u0BA4\u0BC7\u0BB5\u0BC8\u0BAF\u0BBF\u0BB2\u0BCd\u0BB2\u0BC1.',
+        hwTitle: '\u0B8E\u0B9A\u0BCd\u0BB1\u0BC7 \u0B9A\u0BC6\u0BAF\u0BB2\u0BCD',
+        hw1: '\u0B95\u0BC1\u0BB1\u0BB2\u0BC1',
+        hw2: '\u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF \u0B95\u0BA3\u0BCd\u0B9F\u0BC1',
+        hw3: '\u0B87\u0BA3\u0B9F\u0BCd\u0BAF\u0B99\u0BCd\u0B95',
+        ftTitle: '\u0B85\u0BAE\u0BC8\u0BAA\u0BBE\u0B95\u0BC1\u0B95\u0BB3\u0BCD',
+        ft1: '\u0B87\u0BB0\u0BCd\u0BA4\u0BCd\u0B9F \u0BAA\u0BCA\u0BB0\u0BC1\u0B9A\u0BAF\u0BCD',
+        ft2: '\u0B87\u0B9F\u0BCd\u0BAA\u0BBF\u0BA4\u0BCd\u0BA4\u0BAE\u0BCD \u0B85\u0BB4\u0BBF\u0BAF\u0BA4\u0BA4\u0BCd\u0BA4\u0B9F\u0BCD',
+        ft3: '\u0B85\u0BB5\u0B9A\u0BB0 \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95',
+        ft4: '\u0B8E\u0BB2\u0BBF\u0BAF\u0BA4\u0BCd\u0BA4\u0BAA\u0BCD\u0BAA\u0B9F\u0BCd\u0BBF\u0BAF\u0BBE \u0BAE\u0BB1\u0BCd\u0BB1\u0BC1\u0B99\u0BCd\u0B95',
+        apiLnk: '\u0B86\u0BAA\u0BBF \u0B9A\u0BBF\u0BBF\u0BBF\u0BB0\u0BAE\u0BCD',
+        bnHome: '\u0B8E\u0BB5\u0BB8\u0BBF',
+        bnEmg: '\u0B85\u0BB5\u0B9A\u0BB0',
+        bnDonor: '\u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF',
+        bnFind: '\u0BA4\u0BC7\u0B9F\u0BC1'
+    }
+};
+
+function setLang(lang) {
+    curLang = lang;
+    document.getElementById('langEn').classList.toggle('on', lang === 'en');
+    document.getElementById('langTa').classList.toggle('on', lang === 'ta');
+    applyLang();
+}
+
+function applyLang() {
+    var t = T[curLang];
+    var el = document.getElementById('heroTitle');
+    el.innerHTML = t.heroTitle + '<br><span id="heroHL">' + t.heroHL + '</span>';
+    document.getElementById('heroSub').textContent = t.heroSub;
+    document.getElementById('emgTitle').textContent = t.emgTitle;
+    document.getElementById('emgSub').textContent = t.emgSub;
+    document.getElementById('qaDonorT').textContent = t.qaDonorT;
+    document.getElementById('qaDonorS').textContent = t.qaDonorS;
+    document.getElementById('qaFindT').textContent = t.qaFindT;
+    document.getElementById('qaFindS').textContent = t.qaFindS;
+    document.getElementById('vcTitle').textContent = t.vcTitle;
+    document.getElementById('vcSub').textContent = t.vcSub;
+    document.getElementById('hwTitle').textContent = t.hwTitle;
+    document.getElementById('hw1').textContent = t.hw1;
+    document.getElementById('hw2').textContent = t.hw2;
+    document.getElementById('hw3').textContent = t.hw3;
+    document.getElementById('ftTitle').textContent = t.ftTitle;
+    document.getElementById('ft1').textContent = t.ft1;
+    document.getElementById('ft2').textContent = t.ft2;
+    document.getElementById('ft3').textContent = t.ft3;
+    document.getElementById('ft4').textContent = t.ft4;
+    document.getElementById('apiLnk').textContent = t.apiLnk;
+    document.getElementById('bnHome').textContent = t.bnHome;
+    document.getElementById('bnEmg').textContent = t.bnEmg;
+    document.getElementById('bnDonor').textContent = t.bnDonor;
+    document.getElementById('bnFind').textContent = t.bnFind;
+}
+
+applyLang();
+
+</script>
+</body>
+</html>

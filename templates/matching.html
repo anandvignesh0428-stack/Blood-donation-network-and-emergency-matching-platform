@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Find Matching Donors</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f5f5f5;
+        }
+
+        header {
+            background: #b71c1c;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            width: 900px;
+            max-width: 95%;
+            margin: 40px auto;
+        }
+
+        h2 {
+            text-align: center;
+            color: #b71c1c;
+            margin-bottom: 30px;
+        }
+
+        .request-card {
+            background: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .request-card h3 {
+            color: #b71c1c;
+            margin-top: 0;
+        }
+
+        .request-info {
+            margin: 8px 0;
+        }
+
+        .match-button {
+            margin-top: 15px;
+            padding: 12px 20px;
+            background: #b71c1c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .match-button:hover {
+            background: #8e0000;
+        }
+
+        .results {
+            margin-top: 20px;
+        }
+
+        .donor-card {
+            background: #f9f9f9;
+            border-left: 5px solid #b71c1c;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .no-match {
+            margin-top: 15px;
+            color: #b71c1c;
+            font-weight: bold;
+        }
+
+        .back {
+            display: block;
+            text-align: center;
+            margin: 30px;
+            color: #b71c1c;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>🩸 Blood Donation Network</h1>
+    </header>
+
+
+    <div class="container">
+
+        <h2>🔎 Find Matching Donors</h2>
+
+        <div id="requests">
+            Loading emergency requests...
+        </div>
+
+    </div>
+
+
+    <a href="/" class="back">
+        ← Back to Home
+    </a>
+
+
+    <script>
+
+        async function loadRequests() {
+
+            try {
+
+                const response = await fetch("/emergency-requests");
+
+                const requests = await response.json();
+
+                const container = document.getElementById("requests");
+
+                container.innerHTML = "";
+
+                if (requests.length === 0) {
+
+                    container.innerHTML =
+                        "<p>No emergency requests found.</p>";
+
+                    return;
+                }
+
+
+                requests.forEach(function(request) {
+
+                    const card = document.createElement("div");
+
+                    card.className = "request-card";
+
+                    card.innerHTML = `
+
+                        <h3>
+                            Emergency Request #${request.id}
+                        </h3>
+
+                        <p class="request-info">
+                            <strong>Patient:</strong>
+                            ${request.patient_name}
+                        </p>
+
+                        <p class="request-info">
+                            <strong>Blood Group:</strong>
+                            ${request.blood_group}
+                        </p>
+
+                        <p class="request-info">
+                            <strong>Location:</strong>
+                            ${request.location}
+                        </p>
+
+                        <p class="request-info">
+                            <strong>Hospital:</strong>
+                            ${request.hospital}
+                        </p>
+
+                        <p class="request-info">
+                            <strong>Contact:</strong>
+                            ${request.contact}
+                        </p>
+
+                        <button
+                            class="match-button"
+                            onclick="findDonors(${request.id})"
+                        >
+                            Find Matching Donors
+                        </button>
+
+                        <div
+                            class="results"
+                            id="results-${request.id}"
+                        ></div>
+
+                    `;
+
+                    container.appendChild(card);
+
+                });
+
+            } catch (error) {
+
+                document.getElementById("requests").innerHTML =
+                    "<p>Unable to load emergency requests.</p>";
+
+            }
+
+        }
+
+
+        async function findDonors(requestId) {
+
+            const results =
+                document.getElementById(
+                    `results-${requestId}`
+                );
+
+            results.innerHTML =
+                "Searching for matching donors...";
+
+
+            try {
+
+                const response = await fetch(
+                    `/match/${requestId}`
+                );
+
+                const data = await response.json();
+
+
+                if (
+                    !data.matched_donors ||
+                    data.matched_donors.length === 0
+                ) {
+
+                    results.innerHTML =
+                        `<p class="no-match">
+                            No matching donors found.
+                        </p>`;
+
+                    return;
+                }
+
+
+                results.innerHTML =
+                    "<h3>🩸 Matching Donors</h3>";
+
+
+                data.matched_donors.forEach(function(donor) {
+
+                    const donorCard =
+                        document.createElement("div");
+
+                    donorCard.className = "donor-card";
+
+                    donorCard.innerHTML = `
+
+                        <p>
+                            <strong>Name:</strong>
+                            ${donor.name}
+                        </p>
+
+                        <p>
+                            <strong>Blood Group:</strong>
+                            ${donor.blood_group}
+                        </p>
+
+                        <p>
+                            <strong>Location:</strong>
+                            ${donor.location}
+                        </p>
+
+                        <p>
+                            <strong>Phone:</strong>
+                            ${donor.phone}
+                        </p>
+
+                        <p>
+                            <strong>Status:</strong>
+                            Available
+                        </p>
+
+                    `;
+
+                    results.appendChild(donorCard);
+
+                });
+
+            } catch (error) {
+
+                results.innerHTML =
+                    `<p class="no-match">
+                        Error while finding donors.
+                    </p>`;
+
+            }
+
+        }
+
+
+        loadRequests();
+
+    </script>
+
+</body>
+
+</html>
