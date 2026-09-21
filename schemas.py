@@ -3,6 +3,7 @@ from typing import Optional
 
 
 VALID_BLOOD_GROUPS = {"A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"}
+VALID_PRIORITIES = {"Critical", "High", "Normal"}
 
 
 def normalize_blood_group(bg: str) -> str:
@@ -15,6 +16,8 @@ class DonorCreate(BaseModel):
     location: str
     phone: str
     available: bool = True
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
     @field_validator("name")
     @classmethod
@@ -57,6 +60,22 @@ class DonorCreate(BaseModel):
             raise ValueError("Phone number too long (max 15 digits)")
         return v
 
+    @field_validator("latitude")
+    @classmethod
+    def validate_latitude(cls, v):
+        if v is not None:
+            if v < -90 or v > 90:
+                raise ValueError("Latitude must be between -90 and 90")
+        return v
+
+    @field_validator("longitude")
+    @classmethod
+    def validate_longitude(cls, v):
+        if v is not None:
+            if v < -180 or v > 180:
+                raise ValueError("Longitude must be between -180 and 180")
+        return v
+
 
 class EmergencyRequestCreate(BaseModel):
     patient_name: str
@@ -64,6 +83,9 @@ class EmergencyRequestCreate(BaseModel):
     location: str
     hospital: str
     contact: str
+    priority: str = "Normal"
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
     @field_validator("patient_name")
     @classmethod
@@ -114,4 +136,28 @@ class EmergencyRequestCreate(BaseModel):
             raise ValueError("Contact number must have at least 10 digits")
         if len(digits) > 15:
             raise ValueError("Contact number too long (max 15 digits)")
+        return v
+
+    @field_validator("priority")
+    @classmethod
+    def validate_priority(cls, v: str) -> str:
+        v = v.strip()
+        if v not in VALID_PRIORITIES:
+            return "Normal"
+        return v
+
+    @field_validator("latitude")
+    @classmethod
+    def validate_latitude(cls, v):
+        if v is not None:
+            if v < -90 or v > 90:
+                raise ValueError("Latitude must be between -90 and 90")
+        return v
+
+    @field_validator("longitude")
+    @classmethod
+    def validate_longitude(cls, v):
+        if v is not None:
+            if v < -180 or v > 180:
+                raise ValueError("Longitude must be between -180 and 180")
         return v

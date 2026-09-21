@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, Float
 from database import Base
 
 
 VALID_BLOOD_GROUPS = {"A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"}
+VALID_PRIORITIES = {"Critical", "High", "Normal"}
 
 
 def normalize_blood_group(bg: str) -> str:
@@ -28,6 +29,10 @@ class Donor(Base):
 
     available = Column(Boolean, default=True)
 
+    latitude = Column(Float, nullable=True)
+
+    longitude = Column(Float, nullable=True)
+
 
 # =========================
 # EMERGENCY REQUEST TABLE
@@ -49,3 +54,9 @@ class EmergencyRequest(Base):
     contact = Column(String, nullable=False)
 
     status = Column(String, default="Pending")
+
+    priority = Column(String, default="Normal")
+
+    latitude = Column(Float, nullable=True)
+
+    longitude = Column(Float, nullable=True)

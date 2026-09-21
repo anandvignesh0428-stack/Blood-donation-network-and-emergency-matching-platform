@@ -2,160 +2,321 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emergency Blood Request</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f5f5f7; min-height: 100vh; -webkit-font-smoothing: antialiased; }
-        .app-header { background: linear-gradient(145deg, #b71c1c 0%, #c62828 40%, #e53935 100%); padding: 22px 20px 20px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(183,28,28,0.35); }
-        .header-top { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 2px; }
-        .header-icon { width: 38px; height: 38px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-        .header-top h1 { color: white; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.3px; }
-        .header-sub { color: rgba(255,255,255,0.82); font-size: 0.82rem; margin-bottom: 12px; font-weight: 400; }
-        .lang-pill { display: inline-flex; background: rgba(0,0,0,0.15); border-radius: 22px; padding: 3px; }
-        .lang-pill button { padding: 7px 22px; border: none; border-radius: 20px; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.3s; background: transparent; color: rgba(255,255,255,0.7); }
-        .lang-pill button.active { background: white; color: #b71c1c; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-        .app-container { max-width: 520px; margin: 0 auto; padding: 16px 14px 60px; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            color: #1a1a2e;
+        }
+
+        .top-bar {
+            background: linear-gradient(135deg, #b71c1c 0%, #c62828 50%, #d32f2f 100%);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 56px;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            box-shadow: 0 2px 12px rgba(183,28,28,0.25);
+        }
+        .top-bar-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .top-bar-icon { width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .top-bar-title { color: white; font-size: 1rem; font-weight: 700; }
+        .lang-toggle { display: flex; background: rgba(255,255,255,0.15); border-radius: 20px; padding: 2px; }
+        .lang-btn { padding: 5px 14px; border: none; border-radius: 18px; font-size: 0.72rem; font-weight: 700; cursor: pointer; background: transparent; color: rgba(255,255,255,0.65); transition: all 0.2s; }
+        .lang-btn.active { background: white; color: #b71c1c; }
+
+        .container { max-width: 640px; margin: 0 auto; padding: 16px 16px 30px; }
+
+        .page-title { font-size: 1.4rem; font-weight: 800; color: #1a1a2e; margin-bottom: 4px; }
+        .page-subtitle { font-size: 0.85rem; color: #888; margin-bottom: 20px; }
+
         .voice-section { display: none; }
-        .voice-section.active { display: block; animation: fadeUp 0.35s ease; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+        .voice-section.active { display: block; animation: fadeUp 0.3s ease; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
         .progress-bar { display: flex; align-items: flex-start; justify-content: center; gap: 0; margin: 8px auto 18px; max-width: 340px; }
         .progress-step { display: flex; flex-direction: column; align-items: center; flex: 1; }
-        .p-circle { width: 32px; height: 32px; border-radius: 50%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: #999; transition: all 0.4s; z-index: 2; flex-shrink: 0; }
-        .progress-step.active .p-circle { background: linear-gradient(135deg, #b71c1c, #e53935); color: white; box-shadow: 0 3px 12px rgba(183,28,28,0.4); transform: scale(1.12); }
+        .p-circle { width: 30px; height: 30px; border-radius: 50%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; color: #999; transition: all 0.3s; z-index: 2; flex-shrink: 0; }
+        .progress-step.active .p-circle { background: linear-gradient(135deg, #b71c1c, #e53935); color: white; box-shadow: 0 3px 12px rgba(183,28,28,0.4); transform: scale(1.1); }
         .progress-step.done .p-circle { background: #4caf50; color: white; }
-        .p-label { font-size: 0.65rem; color: #aaa; margin-top: 6px; font-weight: 600; text-align: center; transition: color 0.3s; }
+        .p-label { font-size: 0.62rem; color: #aaa; margin-top: 5px; font-weight: 600; text-align: center; }
         .progress-step.active .p-label { color: #b71c1c; font-weight: 700; }
         .progress-step.done .p-label { color: #4caf50; }
-        .progress-line { width: 36px; height: 3px; background: #e0e0e0; border-radius: 2px; margin-top: 14px; flex-shrink: 0; transition: background 0.4s; }
+        .progress-line { width: 32px; height: 3px; background: #e0e0e0; border-radius: 2px; margin-top: 13px; flex-shrink: 0; transition: background 0.3s; }
         .progress-line.done { background: #4caf50; }
-        .mic-area { display: flex; flex-direction: column; align-items: center; padding: 20px 0 10px; }
-        .mic-ring { position: relative; width: 140px; height: 140px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .mic-ring::before { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 3px solid rgba(183,28,28,0.12); transition: border-color 0.4s, transform 0.4s; }
-        .mic-ring.listening::before { border-color: rgba(183,28,28,0.3); animation: ring-glow 1.5s ease-in-out infinite; }
-        @keyframes ring-glow { 0%, 100% { transform: scale(1); border-color: rgba(183,28,28,0.25); } 50% { transform: scale(1.07); border-color: rgba(183,28,28,0.55); } }
-        .mic-btn { width: 120px; height: 120px; border-radius: 50%; border: none; background: linear-gradient(145deg, #c62828, #b71c1c 50%, #8e0000); color: white; font-size: 46px; cursor: pointer; box-shadow: 0 8px 32px rgba(183,28,28,0.45), 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; display: flex; align-items: center; justify-content: center; z-index: 1; -webkit-tap-highlight-color: transparent; }
-        .mic-btn:hover { transform: scale(1.04); box-shadow: 0 10px 36px rgba(183,28,28,0.5); }
-        .mic-btn:active { transform: scale(0.96); }
-        .mic-btn.listening { animation: mic-pulse 1.3s ease-in-out infinite; background: linear-gradient(145deg, #e53935, #c62828 50%, #b71c1c); }
-        @keyframes mic-pulse { 0% { box-shadow: 0 0 0 0 rgba(183,28,28,0.55); transform: scale(1); } 50% { box-shadow: 0 0 0 30px rgba(183,28,28,0); transform: scale(1.05); } 100% { box-shadow: 0 0 0 0 rgba(183,28,28,0); transform: scale(1); } }
-        .mic-text { margin-top: 18px; font-size: 1.15rem; font-weight: 700; color: #222; }
-        .mic-hint-text { margin-top: 5px; font-size: 0.82rem; color: #999; text-align: center; max-width: 260px; line-height: 1.4; }
-        .voice-status-card { background: white; border-radius: 16px; padding: 14px 18px; margin-top: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 12px; }
-        .vs-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+
+        .card { background: white; border-radius: 16px; padding: 18px; margin-bottom: 12px; box-shadow: 0 1px 8px rgba(0,0,0,0.05); }
+
+        .mic-area { display: flex; flex-direction: column; align-items: center; padding: 16px 0 10px; }
+        .mic-ring { position: relative; width: 130px; height: 130px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .mic-ring::before { content: ''; position: absolute; inset: -6px; border-radius: 50%; border: 3px solid rgba(183,28,28,0.12); transition: border-color 0.3s; }
+        .mic-ring.listening::before { border-color: rgba(183,28,28,0.4); animation: ringPulse 1.5s ease-in-out infinite; }
+        @keyframes ringPulse { 0%, 100% { transform: scale(1); border-color: rgba(183,28,28,0.25); } 50% { transform: scale(1.06); border-color: rgba(183,28,28,0.5); } }
+        .mic-btn { width: 110px; height: 110px; border-radius: 50%; border: none; background: linear-gradient(145deg, #c62828, #b71c1c 50%, #8e0000); color: white; font-size: 42px; cursor: pointer; box-shadow: 0 6px 24px rgba(183,28,28,0.4); transition: transform 0.2s; display: flex; align-items: center; justify-content: center; z-index: 1; }
+        .mic-btn:active { transform: scale(0.95); }
+        .mic-btn.listening { animation: micPulse 1.3s ease-in-out infinite; background: linear-gradient(145deg, #e53935, #c62828 50%, #b71c1c); }
+        @keyframes micPulse { 0% { box-shadow: 0 0 0 0 rgba(183,28,28,0.5); } 50% { box-shadow: 0 0 0 24px rgba(183,28,28,0); } 100% { box-shadow: 0 0 0 0 rgba(183,28,28,0); } }
+        .mic-label { margin-top: 14px; font-size: 1rem; font-weight: 700; color: #222; }
+        .mic-hint { margin-top: 4px; font-size: 0.78rem; color: #999; text-align: center; max-width: 260px; line-height: 1.4; }
+
+        .status-card { display: flex; align-items: center; gap: 12px; }
+        .vs-icon { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
         .vs-icon.ready { background: #e8f5e9; }
-        .vs-icon.listening { background: #ffebee; animation: icon-pulse 1.2s infinite; }
+        .vs-icon.listening { background: #ffebee; animation: iconPulse 1.2s infinite; }
         .vs-icon.processing { background: #fff3e0; }
         .vs-icon.success { background: #e8f5e9; }
-        @keyframes icon-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-        .vs-text { font-size: 0.9rem; font-weight: 600; color: #333; }
-        .vs-text .vs-sub { font-weight: 400; color: #999; font-size: 0.78rem; display: block; margin-top: 1px; }
-        .transcript-card { background: white; border-radius: 16px; padding: 16px 18px; margin-top: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-left: 4px solid #b71c1c; min-height: 56px; display: flex; gap: 12px; align-items: flex-start; }
-        .tc-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
-        .tc-text { font-size: 0.95rem; color: #333; line-height: 1.55; word-break: break-word; }
+        @keyframes iconPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .vs-text { font-size: 0.85rem; font-weight: 600; color: #333; }
+        .vs-sub { font-weight: 400; color: #999; font-size: 0.75rem; display: block; margin-top: 1px; }
+
+        .transcript-box { border-left: 4px solid #b71c1c; min-height: 48px; display: flex; gap: 10px; align-items: flex-start; }
+        .tc-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+        .tc-text { font-size: 0.9rem; color: #333; line-height: 1.5; word-break: break-word; }
         .tc-text.placeholder { color: #bbb; font-style: italic; }
-        .section-title { font-size: 0.8rem; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; text-align: center; }
-        .detail-cards { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
-        .detail-card { background: white; border-radius: 14px; padding: 14px 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); display: flex; align-items: center; gap: 14px; transition: transform 0.15s; }
-        .detail-card:active { transform: scale(0.985); }
-        .dc-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+
+        .detail-cards { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+        .detail-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #fafafa; border-radius: 12px; transition: transform 0.15s; }
+        .detail-card:active { transform: scale(0.99); }
+        .dc-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
         .dc-icon.patient { background: #e3f2fd; }
         .dc-icon.blood { background: #ffebee; }
         .dc-icon.location { background: #e8f5e9; }
         .dc-icon.hospital { background: #f3e5f5; }
         .dc-icon.contact { background: #fff8e1; }
+        .dc-icon.priority { background: #fce4ec; }
         .dc-info { flex: 1; min-width: 0; }
-        .dc-label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
-        .dc-value { font-size: 1.05rem; color: #1a1a1a; font-weight: 600; margin-top: 2px; word-break: break-word; }
+        .dc-label { font-size: 0.68rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+        .dc-value { font-size: 0.95rem; color: #1a1a2e; font-weight: 600; margin-top: 2px; word-break: break-word; }
         .dc-value.empty { color: #ccc; font-style: italic; }
-        .confirm-question { text-align: center; font-size: 1rem; font-weight: 600; color: #333; margin-top: 20px; margin-bottom: 14px; }
-        .action-row { display: flex; gap: 12px; margin-top: 4px; }
-        .action-row button { flex: 1; padding: 16px; border-radius: 14px; border: none; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; transition: transform 0.15s, box-shadow 0.15s; -webkit-tap-highlight-color: transparent; }
-        .btn-confirm { background: linear-gradient(135deg, #43a047, #2e7d32); color: white; box-shadow: 0 4px 16px rgba(46,125,50,0.35); }
+
+        .confirm-actions { display: flex; gap: 10px; margin-top: 14px; }
+        .confirm-actions button { flex: 1; padding: 14px; border-radius: 12px; border: none; font-size: 0.9rem; font-weight: 700; cursor: pointer; min-height: 48px; transition: transform 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn-confirm { background: linear-gradient(135deg, #43a047, #2e7d32); color: white; box-shadow: 0 3px 12px rgba(46,125,50,0.3); }
         .btn-confirm:active { transform: scale(0.97); }
         .btn-retry { background: #f5f5f5; color: #444; border: 2px solid #e0e0e0 !important; }
         .btn-retry:active { background: #eee; transform: scale(0.97); }
-        .manual-toggle { display: flex; align-items: center; justify-content: center; gap: 6px; background: none; border: none; color: #b71c1c; font-size: 0.85rem; margin-top: 18px; cursor: pointer; padding: 10px; font-weight: 600; border-radius: 10px; width: 100%; transition: background 0.2s; }
+        .btn-edit { background: #e3f2fd; color: #1565c0; }
+
+        .manual-toggle { display: flex; align-items: center; justify-content: center; gap: 6px; background: none; border: none; color: #b71c1c; font-size: 0.82rem; margin-top: 14px; cursor: pointer; padding: 10px; font-weight: 600; border-radius: 10px; width: 100%; }
         .manual-toggle:hover { background: #ffebee; }
-        .success-screen { text-align: center; padding: 30px 20px; }
-        .success-icon-wrap { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #e8f5e9, #c8e6c9); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 36px; animation: success-pop 0.5s ease; }
-        @keyframes success-pop { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
-        .success-title { font-size: 1.3rem; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; }
-        .success-sub { font-size: 0.92rem; color: #666; margin-bottom: 24px; line-height: 1.4; }
-        .btn-new-request { display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; border-radius: 14px; border: none; font-size: 0.95rem; font-weight: 700; cursor: pointer; background: linear-gradient(135deg, #b71c1c, #c62828); color: white; box-shadow: 0 4px 16px rgba(183,28,28,0.3); transition: transform 0.15s; -webkit-tap-highlight-color: transparent; }
-        .btn-new-request:active { transform: scale(0.97); }
-        .status-msg { text-align: center; font-weight: 600; padding: 14px; border-radius: 12px; font-size: 0.95rem; margin-top: 16px; }
+
+        .success-screen { text-align: center; padding: 24px 16px; }
+        .success-icon { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #e8f5e9, #c8e6c9); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 32px; animation: popIn 0.4s ease; }
+        @keyframes popIn { 0% { transform: scale(0); } 60% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .success-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; }
+        .success-sub { font-size: 0.88rem; color: #666; margin-bottom: 20px; line-height: 1.4; }
+
+        .spinner { width: 28px; height: 28px; border: 3px solid #eee; border-top-color: #b71c1c; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 14px auto; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .status-msg { text-align: center; font-weight: 600; padding: 12px; border-radius: 10px; font-size: 0.9rem; margin-top: 14px; }
         .status-msg.success { background: #e8f5e9; color: #2e7d32; }
         .status-msg.error { background: #ffebee; color: #c62828; }
-        .spinner { width: 32px; height: 32px; border: 3px solid #eee; border-top-color: #b71c1c; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 16px auto; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .box { background: white; border-radius: 18px; padding: 22px; margin-bottom: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
-        .box h2 { text-align: center; color: #b71c1c; margin-bottom: 18px; font-size: 1.05rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        label { display: block; margin-top: 14px; font-weight: 700; font-size: 0.82rem; color: #444; text-transform: uppercase; letter-spacing: 0.3px; }
-        input, select { width: 100%; padding: 14px 16px; margin-top: 6px; border: 2px solid #eee; border-radius: 12px; font-size: 1rem; background: #fafafa; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none; }
-        input:focus, select:focus { border-color: #b71c1c; outline: none; background: #fff; box-shadow: 0 0 0 3px rgba(183,28,28,0.08); }
-        .submit-btn { width: 100%; padding: 16px; margin-top: 22px; background: linear-gradient(135deg, #b71c1c, #d32f2f); color: white; border: none; border-radius: 14px; font-size: 1.05rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(183,28,28,0.3); min-height: 52px; transition: transform 0.15s; }
+
+        .form-label { display: block; margin-top: 12px; font-weight: 700; font-size: 0.78rem; color: #555; text-transform: uppercase; letter-spacing: 0.3px; }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 13px 14px;
+            margin-top: 5px;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            background: #fafafa;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .form-input:focus, .form-select:focus { outline: none; border-color: #b71c1c; background: white; box-shadow: 0 0 0 3px rgba(183,28,28,0.08); }
+        .form-select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+        }
+
+        .gps-btn {
+            width: 100%;
+            padding: 13px;
+            margin-top: 8px;
+            background: linear-gradient(135deg, #43a047, #2e7d32);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 46px;
+            transition: transform 0.15s;
+        }
+        .gps-btn:active { transform: scale(0.98); }
+        .gps-btn:disabled { background: #bbb; cursor: not-allowed; }
+        .gps-coords { text-align: center; margin-top: 6px; font-size: 0.78rem; color: #2e7d32; font-weight: 600; min-height: 18px; }
+        .gps-coords.error { color: #c62828; }
+
+        .priority-selector { display: flex; gap: 8px; margin-top: 8px; }
+        .priority-option {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+        .priority-option.selected { border-color: #b71c1c; background: #ffebee; color: #b71c1c; }
+        .priority-option:hover { border-color: #ccc; }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            margin-top: 18px;
+            background: linear-gradient(135deg, #b71c1c, #d32f2f);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            min-height: 50px;
+            transition: transform 0.15s;
+        }
         .submit-btn:active { transform: scale(0.98); }
-        .submit-btn:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
-        .field-error { color: #c62828; font-size: 0.78rem; margin-top: 4px; display: none; font-weight: 500; }
+        .submit-btn:disabled { background: #bbb; cursor: not-allowed; }
+
+        .field-error { color: #c62828; font-size: 0.75rem; margin-top: 3px; display: none; font-weight: 500; }
         .field-error.show { display: block; }
-        .request-card { background: #fafafa; border-left: 4px solid #b71c1c; padding: 16px; margin-top: 10px; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); }
-        .request-card p { margin: 3px 0; font-size: 0.88rem; color: #444; }
+
+        .request-card { background: #fafafa; border-left: 4px solid #b71c1c; padding: 14px; border-radius: 12px; margin-bottom: 10px; }
+        .request-card p { margin: 3px 0; font-size: 0.85rem; color: #444; }
         .request-card p strong { color: #222; }
-        .status { font-weight: 700; margin-top: 8px; }
-        .pending { color: #d97706; }
-        .matched { color: #2563eb; }
-        .completed { color: #16a34a; }
-        .status-button { margin-top: 8px; width: 100%; padding: 12px; border-radius: 10px; border: none; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: #f0f0f0; color: #444; transition: background 0.2s; min-height: 44px; }
-        .status-button:active { background: #e0e0e0; }
-        .back-link { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 20px auto; color: #b71c1c; text-decoration: none; font-weight: 600; font-size: 0.9rem; padding: 10px; border-radius: 10px; transition: background 0.2s; max-width: 520px; }
+        .request-status { font-weight: 700; margin-top: 6px; }
+        .request-status.pending { color: #d97706; }
+        .request-status.matched { color: #2563eb; }
+        .request-status.completed { color: #16a34a; }
+        .request-priority { display: inline-flex; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; margin-left: 6px; }
+        .request-priority.critical { background: #ffebee; color: #c62828; }
+        .request-priority.high { background: #fff3e0; color: #e65100; }
+        .request-priority.normal { background: #e8f5e9; color: #2e7d32; }
+        .status-btn {
+            margin-top: 6px;
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 40px;
+        }
+        .status-btn:hover { border-color: #b71c1c; color: #b71c1c; }
+
+        .section-title { font-size: 0.78rem; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+
+        .back-link { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 16px auto; color: #b71c1c; text-decoration: none; font-weight: 600; font-size: 0.88rem; padding: 10px; border-radius: 10px; max-width: 640px; }
         .back-link:hover { background: #ffebee; }
-        #message { text-align: center; margin-top: 12px; font-weight: 600; font-size: 0.9rem; }
+
+        .empty-state { text-align: center; padding: 24px; color: #999; }
+        .empty-state-icon { font-size: 2rem; margin-bottom: 8px; }
+        .empty-state-text { font-size: 0.88rem; font-weight: 600; }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 16px rgba(0,0,0,0.08);
+            display: flex;
+            z-index: 200;
+            padding-bottom: env(safe-area-inset-bottom);
+            border-top: 1px solid #f0f0f0;
+        }
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 0 6px;
+            text-decoration: none;
+            color: #999;
+            font-size: 0.65rem;
+            font-weight: 600;
+            gap: 3px;
+            transition: color 0.2s;
+            position: relative;
+        }
+        .nav-item.active { color: #b71c1c; }
+        .nav-item.active::before { content: ''; position: absolute; top: 0; width: 24px; height: 3px; background: #b71c1c; border-radius: 0 0 3px 3px; }
+        .nav-icon { font-size: 1.25rem; line-height: 1; }
+
+        @media (min-width: 768px) { .container { max-width: 560px; padding: 20px 24px 30px; } }
     </style>
 </head>
 <body>
-<header class="app-header">
-    <div class="header-top">
-        <div class="header-icon">&#129656;</div>
-        <h1>Emergency Blood Request</h1>
-    </div>
-    <div class="header-sub">Get blood support quickly</div>
-    <div class="lang-pill">
-        <button id="langEn" class="active" onclick="setLang('en')">English</button>
-        <button id="langTa" onclick="setLang('ta')">&#3000;&#3021;&#2965;&#2992;&#3148;&#2970;&#2991;&#3009;&#3014;</button>
+
+<header class="top-bar">
+    <a href="/" class="top-bar-brand">
+        <div class="top-bar-icon">&#129656;</div>
+        <span class="top-bar-title">Blood Donation Network</span>
+    </a>
+    <div class="lang-toggle">
+        <button id="langEn" class="lang-btn active" onclick="setLang('en')">EN</button>
+        <button id="langTa" class="lang-btn" onclick="setLang('ta')">&#3000;&#3021;&#2965;&#2992;&#3148;&#2970;&#2991;&#3009;&#3014;</button>
     </div>
 </header>
-<div class="app-container">
+
+<div class="container">
+    <div class="page-title" id="pageTitle">Emergency Blood Request</div>
+    <div class="page-subtitle" id="pageSub">Speak naturally in Tamil or English</div>
+
     <div id="voiceStep1" class="voice-section active">
         <div class="progress-bar">
-            <div class="progress-step active"><div class="p-circle">1</div><div class="p-label">Speak</div></div>
+            <div class="progress-step active"><div class="p-circle">1</div><div class="p-label" id="pl1">Speak</div></div>
             <div class="progress-line"></div>
-            <div class="progress-step"><div class="p-circle">2</div><div class="p-label">Details</div></div>
+            <div class="progress-step"><div class="p-circle">2</div><div class="p-label" id="pl2">Details</div></div>
             <div class="progress-line"></div>
-            <div class="progress-step"><div class="p-circle">3</div><div class="p-label">Confirm</div></div>
+            <div class="progress-step"><div class="p-circle">3</div><div class="p-label" id="pl3">Confirm</div></div>
             <div class="progress-line"></div>
-            <div class="progress-step"><div class="p-circle">4</div><div class="p-label">Done</div></div>
+            <div class="progress-step"><div class="p-circle">4</div><div class="p-label" id="pl4">Done</div></div>
         </div>
-        <div class="voice-status-card">
+        <div class="card status-card">
             <div class="vs-icon ready" id="vsIcon1">&#9679;</div>
             <div class="vs-text">
-                <span id="step1Label">Step 1 of 4 &#8212; Speak your request</span>
+                <span id="step1Label">Step 1 - Speak your request</span>
                 <span class="vs-sub" id="step1Sub">Ready to listen</span>
             </div>
         </div>
         <div class="mic-area">
             <div class="mic-ring" id="micRing">
-                <button class="mic-btn" id="mainMicBtn" onclick="startListening()" title="Tap to speak">&#127908;</button>
+                <button class="mic-btn" id="mainMicBtn" onclick="startListening()">&#127908;</button>
             </div>
-            <div class="mic-text" id="micLabel">Tap to speak</div>
-            <div class="mic-hint-text" id="micHint">Speak naturally in Tamil or English</div>
+            <div class="mic-label" id="micLabel">Tap to speak</div>
+            <div class="mic-hint" id="micHint">Speak naturally in Tamil or English</div>
         </div>
-        <div class="transcript-card" id="transcriptBox">
+        <div class="card transcript-box" id="transcriptBox">
             <span class="tc-icon">&#128172;</span>
-            <span class="tc-text placeholder">Your words will appear here...</span>
+            <span class="tc-text placeholder" id="tcText1">Your words will appear here...</span>
         </div>
-        <button class="manual-toggle" onclick="showManualForm()">&#9000; Use Manual Form</button>
+        <button class="manual-toggle" onclick="showManualForm()">&#9000; <span id="manualToggleText">Use Manual Form</span></button>
     </div>
+
     <div id="voiceStep2" class="voice-section">
         <div class="progress-bar">
             <div class="progress-step done"><div class="p-circle">&#10003;</div><div class="p-label">Speak</div></div>
@@ -166,19 +327,20 @@
             <div class="progress-line"></div>
             <div class="progress-step"><div class="p-circle">4</div><div class="p-label">Done</div></div>
         </div>
-        <div class="voice-status-card">
+        <div class="card status-card">
             <div class="vs-icon processing">&#8987;</div>
             <div class="vs-text">
-                <span id="step2Label">Step 2 of 4 &#8212; Processing your request&#8230;</span>
+                <span id="step2Label">Processing your request...</span>
                 <span class="vs-sub">Extracting details from your speech</span>
             </div>
         </div>
         <div class="spinner"></div>
-        <div class="transcript-card" id="transcriptBox2">
+        <div class="card transcript-box" id="transcriptBox2">
             <span class="tc-icon">&#128172;</span>
-            <span class="tc-text placeholder">Processing&#8230;</span>
+            <span class="tc-text" id="tcText2">Processing...</span>
         </div>
     </div>
+
     <div id="voiceStep3" class="voice-section">
         <div class="progress-bar">
             <div class="progress-step done"><div class="p-circle">&#10003;</div><div class="p-label">Speak</div></div>
@@ -189,15 +351,17 @@
             <div class="progress-line"></div>
             <div class="progress-step"><div class="p-circle">4</div><div class="p-label">Done</div></div>
         </div>
-        <div class="section-title" id="step3Label">Emergency Details</div>
-        <div class="detail-cards" id="detailCards"></div>
-        <div class="confirm-question">Are these details correct?</div>
-        <div class="action-row">
-            <button class="btn-retry" onclick="retryVoice()">&#128260; Speak Again</button>
-            <button class="btn-confirm" onclick="confirmAndSubmit()">&#9989; Confirm Request</button>
+        <div class="section-title" id="step3Label">Confirm Details</div>
+        <div class="card">
+            <div class="detail-cards" id="detailCards"></div>
         </div>
-        <button class="manual-toggle" onclick="showManualForm()">&#9000; Use Manual Form</button>
+        <div class="confirm-actions">
+            <button class="btn-retry" onclick="retryVoice()">&#128260; <span id="retryText">Speak Again</span></button>
+            <button class="btn-confirm" onclick="confirmAndSubmit()">&#9989; <span id="confirmText">Confirm</span></button>
+        </div>
+        <button class="manual-toggle" onclick="showManualForm()">&#9000; <span id="manualToggleText2">Use Manual Form</span></button>
     </div>
+
     <div id="voiceStep4" class="voice-section">
         <div class="progress-bar">
             <div class="progress-step done"><div class="p-circle">&#10003;</div><div class="p-label">Speak</div></div>
@@ -208,133 +372,199 @@
             <div class="progress-line done"></div>
             <div class="progress-step active"><div class="p-circle">4</div><div class="p-label">Done</div></div>
         </div>
-        <div id="step4Label" class="section-title" style="margin-top:14px;">Request Submitted</div>
         <div id="voiceStatusMsg" class="status-msg"></div>
         <div class="success-screen" id="successScreen" style="display:none;">
-            <div class="success-icon-wrap">&#129656;</div>
-            <div class="success-title">Emergency Request Sent</div>
-            <div class="success-sub">Donor matching has started.<br>You will be notified when a match is found.</div>
-            <button class="btn-new-request" onclick="resetVoiceFlow()">&#128260; Start New Request</button>
+            <div class="success-icon">&#129656;</div>
+            <div class="success-title" id="successTitle">Emergency Request Sent</div>
+            <div class="success-sub" id="successSub">Donor matching has started.</div>
+            <button class="submit-btn" onclick="resetVoiceFlow()">&#128260; <span id="newReqText">Start New Request</span></button>
         </div>
     </div>
-    <div id="manualFormSection" class="box" style="display:none;">
-        <h2 id="manualFormTitle">&#128680; Emergency Blood Request</h2>
+
+    <div id="manualFormSection" class="card" style="display:none;">
+        <div class="section-title" id="manualTitle">&#128680; Emergency Blood Request Form</div>
         <form id="emergencyForm">
-            <label id="lblPatient">Patient Name</label>
-            <input type="text" id="patient_name" placeholder="Enter patient name" required>
-            <label id="lblBlood">Blood Group</label>
-            <select id="blood_group" required>
+            <label class="form-label" id="lblPatient">Patient Name</label>
+            <input type="text" class="form-input" id="patient_name" placeholder="Enter patient name" required>
+
+            <label class="form-label" id="lblBlood">Blood Group</label>
+            <select class="form-select" id="blood_group" required>
                 <option value="">Select Blood Group</option>
                 <option value="A+">A+</option><option value="A-">A-</option>
                 <option value="B+">B+</option><option value="B-">B-</option>
                 <option value="AB+">AB+</option><option value="AB-">AB-</option>
                 <option value="O+">O+</option><option value="O-">O-</option>
             </select>
-            <label id="lblLocation">Location</label>
-            <input type="text" id="location" placeholder="Enter location" required>
-            <p class="field-error" id="location_error"></p>
-            <label id="lblHospital">Hospital</label>
-            <input type="text" id="hospital" placeholder="Enter hospital name" required>
-            <p class="field-error" id="hospital_error"></p>
-            <label id="lblContact">Contact Number</label>
-            <input type="text" id="contact" placeholder="Enter contact number" required>
-            <p class="field-error" id="contact_error"></p>
-            <button type="submit" class="submit-btn" id="submitBtn">Submit Emergency Request</button>
+
+            <label class="form-label" id="lblLocation">Location</label>
+            <input type="text" class="form-input" id="location" placeholder="Enter location" required>
+            <button type="button" class="gps-btn" id="gpsBtn" onclick="useMyLocation()">&#128205; <span id="gpsBtnText">Use My Current Location</span></button>
+            <div class="gps-coords" id="gpsCoords"></div>
+
+            <label class="form-label" id="lblHospital">Hospital</label>
+            <input type="text" class="form-input" id="hospital" placeholder="Enter hospital name" required>
+
+            <label class="form-label" id="lblContact">Contact Number</label>
+            <input type="tel" class="form-input" id="contact" placeholder="Enter 10-digit contact number" required>
+
+            <label class="form-label" id="lblPriority">Priority</label>
+            <div class="priority-selector">
+                <div class="priority-option" data-val="Normal" onclick="selectPriority(this)">&#9899; Normal</div>
+                <div class="priority-option" data-val="High" onclick="selectPriority(this)">&#128992; High</div>
+                <div class="priority-option" data-val="Critical" onclick="selectPriority(this)">&#128308; Critical</div>
+            </div>
+            <input type="hidden" id="priority" value="Normal">
+
+            <button type="submit" class="submit-btn" id="submitBtn">&#128680; <span id="submitText">Submit Emergency Request</span></button>
         </form>
-        <p id="message"></p>
-        <button class="manual-toggle" onclick="hideManualForm()">&#8592; Back to voice</button>
+        <div class="message" id="message"></div>
+        <button class="manual-toggle" onclick="hideManualForm()">&#8592; <span id="backVoiceText">Back to voice</span></button>
     </div>
-    <div class="box">
-        <h2 id="requestsTitle">&#128680; Emergency Requests</h2>
-        <div id="requestList">Loading requests...</div>
+
+    <div class="card">
+        <div class="section-title" id="requestsTitle">&#128680; Emergency Requests</div>
+        <div id="requestList">
+            <div class="empty-state"><div class="spinner"></div></div>
+        </div>
     </div>
 </div>
-<a href="/" class="back-link">&#8592; Back to Home</a>
+
+<a href="/" class="back-link" id="backLink">&#8592; Back to Home</a>
+
+<nav class="bottom-nav">
+    <a href="/" class="nav-item"><span class="nav-icon">&#127968;</span><span id="bnHome">Home</span></a>
+    <a href="/emergency" class="nav-item active"><span class="nav-icon">&#129656;</span><span id="bnEmg">Emergency</span></a>
+    <a href="/donor" class="nav-item"><span class="nav-icon">&#128100;</span><span id="bnDonor">Donor</span></a>
+    <a href="/matching" class="nav-item"><span class="nav-icon">&#128269;</span><span id="bnFind">Find</span></a>
+    <a href="/dashboard" class="nav-item"><span class="nav-icon">&#128200;</span><span id="bnDash">Stats</span></a>
+</nav>
 
 <script>
-
 var currentLang = 'en';
-
 var T = {
     en: {
-        step1Label: 'Step 1 of 4 \u2014 Speak your request',
+        pageTitle: 'Emergency Blood Request',
+        pageSub: 'Speak naturally in Tamil or English',
+        step1Label: 'Step 1 - Speak your request',
         step1Sub: 'Ready to listen',
-        step2Label: 'Step 2 of 4 \u2014 Processing your request\u2026',
-        step3Label: 'Step 3 of 4 \u2014 Confirm details',
-        step4Label: 'Step 4 of 4 \u2014 Submitted!',
+        step2Label: 'Processing your request...',
+        step3Label: 'Confirm Details',
         micTap: 'Tap to speak',
-        micListening: 'Listening\u2026',
-        micHint: 'Speak naturally in Tamil or English',
+        micListening: 'Listening...',
+        micHint: 'Speak naturally in Tamil or English. Examples: "My father needs B positive blood. He is in Salem. Kauvery Hospital. Contact 9876543210."',
         noSpeech: 'Speech recognition not supported in this browser. Use the manual form.',
-        confirmSubmit: '\u2705 Confirm Request',
-        retry: '\uD83D\uDD04 Speak Again',
-        orManual: '\u2328 Use Manual Form',
-        backVoice: '\u2190 Back to voice',
-        patientName: 'Patient Name',
-        bloodGroup: 'Blood Group',
-        location: 'Location',
-        hospital: 'Hospital',
-        contact: 'Contact Number',
-        submitEmergency: 'Submit Emergency Request',
-        submitting: 'Submitting\u2026',
+        manualToggleText: 'Use Manual Form',
+        manualToggleText2: 'Use Manual Form',
+        retryText: 'Speak Again',
+        confirmText: 'Confirm & Submit',
+        newReqText: 'Start New Request',
+        manualTitle: 'Emergency Blood Request Form',
+        lblPatient: 'Patient Name',
+        lblBlood: 'Blood Group',
+        lblLocation: 'Location',
+        gpsBtnText: 'Use My Current Location',
+        gpsGetting: '\u23F3 Getting location...',
+        gpsDetected: 'Detected: ',
+        gpsPermDenied: 'Location permission denied. Enter manually.',
+        gpsUnavailable: 'Location unavailable. Enter manually.',
+        gpsTimeout: 'Location request timed out.',
+        gpsDefault: 'Unable to get location. Enter manually.',
+        lblHospital: 'Hospital',
+        lblContact: 'Contact Number',
+        lblPriority: 'Priority',
+        priorityNormal: 'Normal',
+        priorityHigh: 'High',
+        priorityCritical: 'Critical',
+        submitText: 'Submit Emergency Request',
+        submitting: 'Submitting...',
         submittedSuccess: 'Emergency request submitted successfully!',
         submitFailed: 'Submission failed. Please try again.',
-        somethingWrong: 'Something went wrong. Please try again.',
-        requestsTitle: '\uD83D\uDEA8 Emergency Requests',
+        somethingWrong: 'Something went wrong.',
+        requestsTitle: 'Emergency Requests',
         noRequests: 'No emergency requests found.',
-        unableToLoad: 'Unable to load emergency requests.',
-        unableToUpdate: 'Unable to update request status.',
+        unableToLoad: 'Unable to load requests.',
+        unableToUpdate: 'Unable to update status.',
         markMatched: 'Mark as Matched',
         markCompleted: 'Mark as Completed',
+        backVoice: 'Back to voice',
+        backLink: '\u2190 Back to Home',
         patient: 'Patient',
         blood: 'Blood',
         loc: 'Location',
         hosp: 'Hospital',
-        phone: 'Contact',
-        id: 'Request ID',
+        contact: 'Contact',
+        prio: 'Priority',
+        id: 'ID',
         status: 'Status',
-        voiceConfirmPrefix: 'Emergency request confirmed. Patient ',
-        voiceConfirmSuffix: '. Request submitted.'
+        bnHome: 'Home',
+        bnEmg: 'Emergency',
+        bnDonor: 'Donor',
+        bnFind: 'Find',
+        bnDash: 'Stats',
+        msgFieldRequired: 'All fields are required',
+        message: 'Message'
     },
     ta: {
-        step1Label: '\u0BAA\u0B9F\u0BBF 1 \u0B92\u0BB5 4 \u2014 \u0B89\u0B99\u0BCD\u0B95\u0BB3\u0BCD \u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCD\u0B95',
-        step1Sub: '\u0B95\u0BC7\u0B9F\u0BCD\u0B9F\u0BC1\u0B95\u0BCD\u0B95 \u0B90\u0BB0\u0BBF\u0BAF\u0BA4\u0BC1',
-        step2Label: '\u0BAA\u0B9F\u0BBF 2 \u0B92\u0BB5 4 \u2014 \u0B89\u0B99\u0BCD\u0B95\u0BB3\u0BCD \u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BC7\u0BAF\u0BBE\u0BB2\u0B9D\u0BC1\u0B95\u0BBF\u0BB1\u0BA4\u0BC1\u0BB5\u0B9F\u0B9F\u0BAE\u0BCD\u2026',
-        step3Label: '\u0BAA\u0B9F\u0BBF 3 \u0B92\u0BB5 4 \u2014 \u0BB5\u0BBF\u0BB5\u0BB0\u0BA3\u0BCd \u0B9A\u0B9F\u0BCd\u0B9F\u0BA9\u0BBE\u0BAF\u0BCd',
-        step4Label: '\u0BAA\u0B9F\u0BBF 4 \u0B92\u0BB5 4 \u2014 \u0B9A\u0BC7\u0B95\u0BC0\u0BBF\u0BAF\u0BB5\u0BA4\u0BC1!',
-        micTap: '\u0BA4\u0BCA\u0B9F\u0B9F\u0BBF \u0BAA\u0BC7\u0BB4\u0BBF\u0BBF\u0BA9\u0BCD\u0B9F\u0BC1 \u0BA4\u0B9F\u0BCd\u0B9F\u0BC1\u0B95',
-        micListening: '\u0B95\u0BC7\u0B9F\u0BCd\u0B9F\u0BC1\u0B95\u0BCD\u0B95\u0BBF\u0BB1\u0BA4\u0BC1\u0BB5\u0B9F\u0B9F\u0BAE\u0BCD\u2026',
-        micHint: '\u0B9A\u0BC1\u0BA4\u0BAE\u0BBE\u0BAF\u0BBE \u0BAA\u0BC7\u0BB4\u0BBF\u0BBF\u0BA9\u0BCD\u0B9F\u0BC1 \u0BA4\u0B9F\u0BCd\u0B9F\u0BC1\u0B95',
+        pageTitle: '\u0B85\u0BB5\u0B9A\u0BB0 \u0B87\u0BB0\u0BA4\u0BCd\u0BA4 \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95',
+        pageSub: '\u0BA4\u0BC6\u0BAE\u0BBF\u0BB4\u0BCD \u0B85\u0BB2\u0BCd\u0BB2\u0BA4\u0BC1 \u0B86\u0B99\u0BCd\u0B95\u0BBF\u0BB2\u0BA4\u0BCd\u0BA4\u0BBF\u0BB2\u0BCD \u0BAA\u0BC7\u0BB4\u0BBF\u0BBF\u0BA9\u0BCd\u0B9F\u0BC1 \u0B95\u0BC1\u0BB1\u0BB2\u0BC1\u0B99\u0BCd\u0B95',
+        step1Label: '\u0BAA\u0B9F\u0BBF 1 - \u0B89\u0B99\u0BCd\u0B95\u0BB3\u0BCD \u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95',
+        step1Sub: '\u0B95\u0BC7\u0B9F\u0BCd\u0B9F\u0BC1\u0B95\u0BCD\u0B95 \u0B90\u0BB0\u0BBF\u0BAF\u0BA4\u0BC1',
+        step2Label: '\u0B89\u0B99\u0BCd\u0B95\u0BB3\u0BCD \u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BC7\u0BAF\u0BBE\u0BB2\u0B9D\u0BC1\u0B95\u0BBF\u0BB1\u0BA4\u0BC1\u0BB5\u0B9F\u0B9F\u0BAE\u0BCD...',
+        step3Label: '\u0BB5\u0BBF\u0BB5\u0BB0\u0BA3\u0BCd \u0B9A\u0B9F\u0BCd\u0B9F\u0BA9\u0BBE\u0BAF\u0BCD',
+        micTap: '\u0BA4\u0BCA\u0B9F\u0B9F\u0BBF \u0BAA\u0BC7\u0BB4\u0BBF\u0BBF\u0BA9\u0BCd\u0B9F\u0BC1 \u0BA4\u0B9F\u0BCd\u0B9F\u0BC1\u0B95',
+        micListening: '\u0B95\u0BC7\u0B9F\u0BCd\u0B9F\u0BC1\u0B95\u0BCD\u0B95\u0BBF\u0BB1\u0BA4\u0BC1\u0BB5\u0B9F\u0B9F\u0BAE\u0BCD...',
+        micHint: '\u0BA4\u0BC6\u0BAE\u0BBF\u0BB4\u0BCD \u0B85\u0BB2\u0BCd\u0BB2\u0BA4\u0BC1 \u0B86\u0B99\u0BCd\u0B95\u0BBF\u0BB2\u0BA4\u0BCd\u0BA4\u0BBF\u0BB2\u0BCD \u0BAA\u0BC7\u0BB4\u0BBF\u0BBF\u0BA9\u0BCd\u0B9F\u0BC1 \u0B95\u0BC1\u0BB1\u0BB2\u0BC1\u0B99\u0BCd\u0B95.',
         noSpeech: '\u0B87\u0B95 \u0B89\u0BB2\u0BBE\u0BAA\u0BBF\u0BB2\u0BCd \u0B89\u0BB1\u0BC8\u0BAF\u0BB2\u0BBF\u0BB2\u0BCd \u0B9A\u0BAA\u0BCd\u0BA4\u0BA4\u0BC1 \u0B87\u0B9F\u0BCd\u0BAA\u0BBF\u0BA4\u0B9F\u0BCd\u0BAF \u0B87\u0BBD\u0BCD\u0BB2\u0BC8. \u0B95\u0BC8\u0BC8\u0BAF\u0BB2\u0BCd \u0BAA\u0B9F\u0BBF\u0BB5\u0BCd\u0BAA \u0BAA\u0BAF\u0BCd\u0BAA\u0B9F\u0BC1\u0B99\u0BCd\u0B95.',
-        confirmSubmit: '\u2705 \u0B89\u0BB1\u0BBF\u0BAF\u0BB8\u0BCd\u0BAA\u0B9F\u0BC1\u0B95',
-        retry: '\uD83D\uDD04 \u0BAE\u0BC0\u0BA3\u0BCd\u0B9F\u0BC1\u0BAE\u0BBE\u0B9A\u0BBF \u0BAA\u0BC7\u0BB4\u0BBF\u0BBF\u0BA9\u0BCd\u0B9F\u0BC1\u0B95',
-        orManual: '\u2328 \u0B95\u0BC8\u0BC8\u0BAF\u0BB2\u0BCd \u0BAA\u0B9F\u0BBF\u0BB5\u0BCd\u0BAA',
-        backVoice: '\u2190 \u0B95\u0BC1\u0BB1\u0BB2\u0BC1\u0B95\u0BCD\u0B95\u0BC1\u0B95\u0BCD \u0BA4\u0BBF\u0BB0\u0BC1\u0B99\u0BCd\u0B95',
-        patientName: '\u0BA8\u0BCB\u0B9F\u0BCD\u0B9F \u0BAA\u0BC6\u0BB0\u0BCD\u0BAF\u0BBE\u0BB0\u0BCD \u0BAA\u0BC6\u0BC7\u0BB0\u0BCD',
-        bloodGroup: '\u0B87\u0BB0\u0BCD\u0BA4\u0BCD\u0B9F\u0BC1 \u0B95\u0BB0\u0BCD\u0BA4\u0BCD\u0B9F\u0BCD',
-        location: '\u0B87\u0B9F\u0BCD\u0BAA\u0BBF\u0BA4\u0BCD\u0BA4\u0BAE\u0BCD',
-        hospital: '\u0BAE\u0BB0\u0BC1\u0BA4\u0BCD\u0BA4\u0BB5\u0BBE\u0B9A\u0B9A\u0BBE\u0BB2\u0BCD',
-        contact: '\u0BA4\u0BCA\u0BB2\u0BC8 \u0BA8\u0B99\u0BCD\u0B95\u0BBF\u0BB3\u0BCD',
-        submitEmergency: '\u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BCA\u0BB2\u0BCD\u0BB2\u0BC1\u0B99\u0BCD\u0B95\u0BAA\u0BCD \u0B9A\u0BC7\u0B95\u0BC0\u0BBF\u0BBF\u0BAF\u0BBF\u0B9F\u0BC1',
-        submitting: '\u0B9A\u0BC7\u0B95\u0BC0\u0BA4\u0BC1 \u0BA8\u0B95\u0BC1\u0B95\u0BCD\u0B95\u0B9F\u0BCD\u0B9F\u0BBF\u0B99\u0BCD\u0B95\u0BCD\u2026',
-        submittedSuccess: '\u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BCA\u0BB2\u0BCD\u0BB2\u0BC1\u0B99\u0BCD\u0B95 \u0B5E\u0BBF \u0B9A\u0BC7\u0B95\u0BC0\u0BBF\u0BBF\u0BAE\u0BCD!',
-        submitFailed: '\u0B9A\u0BC7\u0B95\u0BC0\u0BA4\u0BC1 \u0BA4\u0BCB\u0BB2\u0BB8\u0BCD\u0B9F\u0BBF \u0BA4\u0BCb\u0BB1\u0BCD\u0BB1\u0BA4\u0BC1. \u0BAE\u0BC0\u0BA3\u0BCD\u0B9F\u0BC1\u0BAE\u0BBE\u0B9A\u0BBF \u0BA4\u0BBF\u0BB0\u0BC1\u0B99\u0BCD\u0B95.',
-        somethingWrong: '\u0B8F\u0BAA\u0BB5\u0BB2\u0BCd \u0B87\u0B95\u0BCd \u0B85\u0BB5\u0BB2\u0BC8\u0BAF\u0BB3\u0BA4\u0BCD\u0B9F\u0BC1 \u0BB5\u0BC0\u0B9F\u0BCd\u0B9F\u0BA4\u0BC1 \u0BAA\u0BC1\u0BB0\u0B9F\u0BCd\u0B99\u0B95. \u0BAE\u0BC0\u0BA3\u0BCD\u0B9F\u0BC1\u0BAE\u0BBE\u0B9A\u0BBF \u0BA4\u0BBF\u0BB0\u0BC1\u0B99\u0BCD\u0B95.',
-        requestsTitle: '\uD83D\uDEA8 \u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BCA\u0BB2\u0BCD\u0BB2\u0BC1\u0B99\u0BCD\u0B95\u0B9F\u0BCD\u0B9F\u0BBF\u0B95\u0BB3\u0BCD',
-        noRequests: '\u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BCA\u0BB2\u0BCD\u0BB2\u0BC1\u0B99\u0BCD\u0B95\u0B9F\u0BCD\u0B9F\u0BBF \u0B8E\u0BC3\u0BCD\u0BB5\u0BC1 \u0B9A\u0BC7\u0BB0\u0BCD\u0BAE\u0BC1 \u0BAA\u0B9F\u0BBF\u0BAF\u0BB2\u0BB2\u0BCD.',
-        unableToLoad: '\u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BCA\u0BB2\u0BCD\u0BB2\u0BC1\u0B99\u0BCD\u0B95\u0B9F\u0BCD\u0B9F\u0BBF\u0B95\u0BB3\u0BCD \u0B8F\u0BB1\u0BCD\u0B9A\u0BC1\u0BAE\u0BB8\u0BCD\u0B9F\u0BBF\u0BAF\u0B9F\u0BC1 \u0BAE\u0BC1\u0B9F\u0BCB\u0BAA\u0BAA\u0B9F\u0BCD\u0BB5\u0BB3\u0BB2\u0BCD.',
-        unableToUpdate: '\u0B95\u0BCC\u0BBF\u0BA4\u0BA4\u0BCD\u0BA4\u0BC1 \u0BAE\u0BC0\u0BB4\u0BCD\u0BB2\u0BBF\u0BAF\u0B9F\u0BC1 \u0BAE\u0BC1\u0B9F\u0BCB\u0BAA\u0BAA\u0B9F\u0BCD\u0BB5\u0BB3\u0BB2\u0BCD.',
-        markMatched: '\u0BAA\u0BCA\u0BB0\u0BC1\u0BA4\u0BCD\u0B95\u0BC1 \u0B95\u0BC1\u0BB1\u0BBF\u0BBF\u0BB5\u0B9F\u0BCd\u0B9F\u0BBE\u0BAF\u0BCD',
-        markCompleted: '\u0B85\u0BB5\u0B9A\u0BAF\u0B9F\u0BCD\u0B9F\u0BA8\u0BCD\u0BBE\u0BAA\u0BCD\u0BAA\u0BC1 \u0BAE\u0BC8\u0B95\u0BCD\u0B95\u0BC1',
-        patient: '\u0BA8\u0BCB\u0B9F\u0BCD\u0B9F \u0BAA\u0BC6\u0BB0\u0BCD\u0BA4\u0BBE\u0BB0\u0BCD',
-        blood: '\u0B87\u0BB0\u0BCD\u0BA4\u0BCD\u0B9F\u0BCD',
-        loc: '\u0B87\u0B9F\u0BCD\u0BAA\u0BBF\u0BA4\u0BCD\u0BA4\u0BAE\u0BCD',
-        hosp: '\u0BAE\u0BB0\u0BC1\u0BA4\u0BCD\u0BA4\u0BB5\u0BBE\u0B9A\u0B9A\u0BBE\u0BB2\u0BCD',
-        phone: '\u0BA4\u0BCA\u0BB2\u0BC8',
-        id: '\u0B9A\u0BCA\u0BB2\u0BCD\u0BB2\u0BC1\u0B99\u0BCD\u0B95 \u0B85\u0B9F\u0BCD\u0B9F\u0BB2\u0BCD',
-        status: '\u0BA8\u0B9F\u0BCD\u0BAA\u0BBE\u0BA9\u0BCD\u0BA4\u0BCD\u0BA9\u0BCD\u0BAE\u0BCD',
-        voiceConfirmPrefix: '\u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BCA\u0BB2\u0BCD\u0BB2\u0BC1\u0B99\u0BCD\u0B95 \u0B89\u0BB1\u0BBF\u0BAF\u0BB8\u0BCD\u0BAA\u0B9F\u0BCD\u0B9F\u0BBF\u0BA9\u0BCD\u0B95. \u0BA8\u0BCB\u0B9F\u0BCD\u0B9F \u0BAA\u0BC6\u0BB0\u0BCD\u0BA4\u0BBE\u0BB0\u0BCD ',
-        voiceConfirmSuffix: '. \u0B9A\u0BCA\u0BB2\u0BCD\u0BB2\u0BC1\u0B99\u0BCD\u0B95 \u0B9A\u0BC7\u0B95\u0BC0\u0BBF\u0BBF\u0BAE\u0BCD.'
+        manualToggleText: '\u0B95\u0BC8\u0BC8\u0BAF\u0BB2\u0BCd \u0BAA\u0B9F\u0BBF\u0BB5\u0BCd\u0BAA',
+        manualToggleText2: '\u0B95\u0BC8\u0BC8\u0BAF\u0BB2\u0BCd \u0BAA\u0B9F\u0BBF\u0BB5\u0BCd\u0BAA',
+        retryText: '\u0BAE\u0BC0\u0BA3\u0BCd\u0B9F\u0BC1\u0BAE\u0BBE\u0B9A\u0BBF \u0BAA\u0BC7\u0BB4\u0BBF\u0BBF\u0BA9\u0BCd\u0B9F\u0BC1\u0B95',
+        confirmText: '\u0B89\u0BB1\u0BBF\u0BAF\u0BB8\u0BCd\u0BAA\u0B9F\u0BC1\u0B95',
+        newReqText: '\u0BAA\u0BC1\u0BA4\u0BCd\u0BAF \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95 \u0BA4\u0B9F\u0BCd\u0B9F\u0BC1\u0B95',
+        manualTitle: '\u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95 \u0BAA\u0B9F\u0BBF\u0BB5\u0BCd\u0BAA',
+        lblPatient: '\u0BA8\u0BCB\u0B9F\u0BCd\u0B9F \u0BAA\u0BC6\u0BB0\u0BCD\u0BA4\u0BBE\u0BB0\u0BCD',
+        lblBlood: '\u0B87\u0BB0\u0BCd\u0BA4\u0BCd\u0B9F \u0B95\u0BB0\u0BCd\u0BA4\u0BCD\u0B9F\u0BCD',
+        lblLocation: '\u0B87\u0B9F\u0BCd\u0BAA\u0BBF\u0BA4\u0BCd\u0BA4\u0BAE\u0BCD',
+        gpsBtnText: '\u0B8E\u0BB2\u0BBE\u0BCD \u0BA4\u0BB1\u0BCd\u0B95\u0BBE\u0BB2\u0BCD \u0B87\u0B9F\u0BCd\u0BAA\u0BBF\u0BA4\u0BCd\u0BA4\u0BAE\u0BCD',
+        gpsGetting: '\u23F3 \u0B87\u0B9F\u0BCd\u0BAA\u0BBF\u0BA4\u0BCd\u0BA4\u0BAE\u0BCD \u0BAA\u0BC6\u0BB0\u0BC1\u0B95\u0BCd\u0B95\u0BBF\u0BB1\u0BA4\u0BC1...',
+        gpsDetected: '\u0B95\u0BA3\u0BCd\u0B9F\u0BBF\u0B9F\u0BC1 \u0B9A\u0BC7\u0BAF\u0BAE\u0BCD: ',
+        gpsPermDenied: '\u0B87\u0B9F\u0BCd\u0BAA\u0BBF\u0BA4\u0BCd\u0BA4 \u0B85\u0BA9\u0BC1\u0BAE\u0BA4\u0BBF \u0BAE\u0BB1\u0BC1\u0B95\u0BCd\u0B95\u0BAA\u0BAA\u0B9F\u0BCd\u0BB5\u0BB3\u0BCD.',
+        gpsUnavailable: '\u0B87\u0B9F\u0BCd\u0BAA\u0BBF\u0BA4\u0BCd\u0BA4\u0BAE\u0BCD \u0B87\u0BB2\u0BCd\u0BB2\u0BC8.',
+        gpsTimeout: '\u0B87\u0B9F\u0BCd\u0BAA\u0BBF\u0BA4\u0BCd\u0BA4 \u0B95\u0BCA\u0BB3\u0BCd\u0BB8\u0BB2\u0BBE\u0BA4\u0BC1 \u0BA8\u0BC7\u0BB0\u0BAE\u0BCD \u0BAE\u0BC1\u0B9F\u0BCB\u0BB1\u0BCd\u0BB1\u0B9F\u0BC1.',
+        gpsDefault: '\u0B87\u0B9F\u0BCd\u0BAA\u0BBF\u0BA4\u0BCd\u0BA4\u0BAE\u0BCD \u0BAA\u0BC6\u0BB0\u0BC1\u0B95\u0BCd\u0B95 \u0B9A\u0BC7\u0B95\u0BBE\u0BB0\u0B9F\u0BCd \u0B87\u0BB2\u0BCd\u0BB2\u0BC8.',
+        lblHospital: '\u0BAE\u0BB0\u0BC1\u0BA4\u0BCd\u0BA4\u0BB5\u0BBE\u0B9A\u0B9A\u0BBE\u0BB2\u0BCD',
+        lblContact: '\u0BA4\u0BCA\u0BB2\u0BC8 \u0BA8\u0B99\u0BCd\u0B95\u0BBF\u0BB3\u0BCD',
+        lblPriority: '\u0BAE\u0BC1\u0B9F\u0BCB\u0BB1\u0BCd\u0BB1\u0B9F\u0BBF\u0BA9\u0BCD',
+        priorityNormal: '\u0B87\u0BB2\u0BCd\u0BB2\u0BAE\u0BCD',
+        priorityHigh: '\u0B89\u0BAF\u0BB0\u0BCD\u0BAA\u0BCD\u0BAA\u0BBF\u0BAE\u0BCD',
+        priorityCritical: '\u0B85\u0BB5\u0BB8\u0BBF\u0BAF\u0BAE\u0BCD',
+        submitText: '\u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95 \u0B9A\u0BC7\u0B95\u0BC0\u0BBF\u0BBF\u0BAF\u0BBF\u0B9F\u0BC1',
+        submitting: '\u0B9A\u0BC7\u0B95\u0BC0\u0BA4\u0BC1 \u0BA8\u0B95\u0BC1\u0B95\u0BCd\u0B95\u0B9F\u0BCd\u0B9F\u0BBF\u0B99\u0BCd\u0B95\u0BCD...',
+        submittedSuccess: '\u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95 \u0B5E\u0BBF \u0B9A\u0BC7\u0B95\u0BC0\u0BBF\u0BBF\u0BAE\u0BCD!',
+        submitFailed: '\u0B9A\u0BC7\u0B95\u0BC0\u0BA4\u0BC1 \u0BA4\u0BCB\u0BB2\u0BB8\u0BCd\u0B9F\u0BBF \u0BA4\u0BCb\u0BB1\u0BCd\u0BB1\u0BA4\u0BC1.',
+        somethingWrong: '\u0B8F\u0BAA\u0BB5\u0BB2\u0BCd \u0B87\u0B95\u0BCd \u0B85\u0BB5\u0BB2\u0BC8\u0BAF\u0BB3\u0BA4\u0BCd\u0B9F\u0BC1 \u0BB5\u0BC0\u0B9F\u0BCd\u0B9F\u0BA4\u0BC1 \u0BAA\u0BC1\u0BB0\u0B9F\u0BCd\u0B99\u0B95.',
+        requestsTitle: '\u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95\u0B9F\u0BCD\u0B9F\u0BBF\u0B95\u0BB3\u0BCD',
+        noRequests: '\u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95\u0B9F\u0BCD\u0B9F\u0BBF \u0B8E\u0BC3\u0BCD\u0BB5\u0BC1 \u0B9A\u0BC7\u0BB0\u0BCD\u0BAE\u0BC1 \u0BAA\u0B9F\u0BBF\u0BAF\u0BB2\u0BB2\u0BCD.',
+        unableToLoad: '\u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95\u0B9F\u0BCD\u0B9F\u0BBF\u0B95\u0BB3\u0BCD \u0B8F\u0BB1\u0BCd\u0B9A\u0BC1\u0BAE\u0BB8\u0BCd\u0B9F\u0BBF\u0BAF\u0B9F\u0BC1 \u0BAE\u0BC1\u0B9F\u0BCB\u0BAA\u0BAA\u0B9F\u0BCd\u0BB5\u0BB3\u0BB2\u0BCD.',
+        unableToUpdate: '\u0B95\u0BCC\u0BBF\u0BA4\u0BA4\u0BCD\u0BA4\u0BC1 \u0BAE\u0BC0\u0BB4\u0BCd\u0BB2\u0BBF\u0BAF\u0B9F\u0BC1 \u0BAE\u0BC1\u0B9F\u0BCB\u0BAA\u0BAA\u0B9F\u0BCd\u0BB5\u0BB3\u0BB2\u0BCD.',
+        markMatched: '\u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF \u0BAE\u0BB1\u0BBF\u0B9F\u0BAA\u0BCd\u0BAA\u0BBF\u0BB1\u0BC1\u0B99\u0BCd\u0B95',
+        markCompleted: '\u0B85\u0BB5\u0B9A\u0BAF\u0B9F\u0BCd\u0B9F\u0BA8\u0BCD\u0BBE\u0BAA\u0BCd\u0BAA\u0BC1 \u0BAE\u0BC8\u0B95\u0BCd\u0B95\u0BC1',
+        backVoice: '\u0B95\u0BC1\u0BB1\u0BB2\u0BC1\u0B95\u0BCD\u0B95\u0BC1\u0B95\u0BCD \u0BA4\u0BBF\u0BB0\u0BC1\u0B99\u0BCd\u0B95',
+        backLink: '\u2190 \u0B8E\u0BB5\u0BB8\u0BBF\u0B95\u0BCD \u0BA4\u0BBF\u0BB0\u0BC1\u0B99\u0BCd\u0B95',
+        patient: '\u0BA8\u0BCB\u0B9F\u0BCd\u0B9F \u0BAA\u0BC6\u0BB0\u0BCD\u0BA4\u0BBE\u0BB0\u0BCD',
+        blood: '\u0B87\u0BB0\u0BCd\u0BA4\u0BCd\u0B9F\u0BCD',
+        loc: '\u0B87\u0B9F\u0BCd\u0BAA\u0BBF\u0BA4\u0BCd\u0BA4\u0BAE\u0BCD',
+        hosp: '\u0BAE\u0BB0\u0BC1\u0BA4\u0BCd\u0BA4\u0BB5\u0BBE\u0B9A\u0B9A\u0BBE\u0BB2\u0BCD',
+        contact: '\u0BA4\u0BCA\u0BB2\u0BC8',
+        prio: '\u0BAE\u0BC1\u0B9F\u0BCB\u0BB1\u0BCd\u0BB1\u0B9F\u0BBF\u0BA9\u0BCD',
+        id: '\u0B85\u0B9F\u0BCd\u0B9F\u0BB2\u0BCD',
+        status: '\u0BA8\u0B9F\u0BCd\u0BAA\u0BBE\u0BA9\u0BCD\u0BA4\u0BCD\u0BA9\u0BCD\u0BAE\u0BCD',
+        bnHome: '\u0B8E\u0BB5\u0BB8\u0BBF',
+        bnEmg: '\u0B85\u0BB5\u0B9A\u0BB0',
+        bnDonor: '\u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF',
+        bnFind: '\u0BA4\u0BC7\u0B9F\u0BC1',
+        bnDash: '\u0BAA\u0BBF\u0BB1\u0BC1\u0BAE\u0BBE\u0BB0\u0B99\u0BCd\u0B95\u0BB3\u0BCD',
+        msgFieldRequired: '\u0B8E\u0BB2\u0BB2\u0BBE \u0B89\u0BB3\u0BCd\u0BB3\u0BBF\u0B9F\u0BCd\u0BAF\u0B95\u0BB3\u0BCD \u0BA4\u0BC7\u0BB5\u0BC8\u0BAF\u0BBE\u0B95\u0BBF\u0BB5\u0BCD',
+        message: '\u0B9A\u0BC6\u0BAF\u0BB2\u0B9D\u0BC1'
     }
 };
 
@@ -347,36 +577,53 @@ function setLang(lang) {
 
 function applyLang() {
     var t = T[currentLang];
+    document.getElementById('pageTitle').textContent = t.pageTitle;
+    document.getElementById('pageSub').textContent = t.pageSub;
     document.getElementById('step1Label').textContent = t.step1Label;
     document.getElementById('step1Sub').textContent = t.step1Sub;
     document.getElementById('step2Label').textContent = t.step2Label;
     document.getElementById('step3Label').textContent = t.step3Label;
-    document.getElementById('step4Label').textContent = t.step4Label;
     document.getElementById('micLabel').textContent = t.micTap;
     document.getElementById('micHint').textContent = t.micHint;
-    document.getElementById('lblPatient').textContent = t.patientName;
-    document.getElementById('lblBlood').textContent = t.bloodGroup;
-    document.getElementById('lblLocation').textContent = t.location;
-    document.getElementById('lblHospital').textContent = t.hospital;
-    document.getElementById('lblContact').textContent = t.contact;
-    document.getElementById('submitBtn').textContent = t.submitEmergency;
-    document.getElementById('manualFormTitle').textContent = '\uD83D\uDEA8 ' + t.patientName + ' - ' + t.bloodGroup;
+    document.getElementById('manualToggleText').textContent = t.manualToggleText;
+    document.getElementById('manualToggleText2').textContent = t.manualToggleText2;
+    document.getElementById('retryText').textContent = t.retryText;
+    document.getElementById('confirmText').textContent = t.confirmText;
+    document.getElementById('newReqText').textContent = t.newReqText;
+    document.getElementById('manualTitle').textContent = t.manualTitle;
+    document.getElementById('lblPatient').textContent = t.lblPatient;
+    document.getElementById('lblBlood').textContent = t.lblBlood;
+    document.getElementById('lblLocation').textContent = t.lblLocation;
+    document.getElementById('lblHospital').textContent = t.lblHospital;
+    document.getElementById('lblContact').textContent = t.lblContact;
+    document.getElementById('lblPriority').textContent = t.lblPriority;
+    document.getElementById('submitText').textContent = t.submitText;
     document.getElementById('requestsTitle').textContent = t.requestsTitle;
+    document.getElementById('backVoiceText').textContent = t.backVoice;
+    document.getElementById('backLink').textContent = t.backLink;
+    document.getElementById('bnHome').textContent = t.bnHome;
+    document.getElementById('bnEmg').textContent = t.bnEmg;
+    document.getElementById('bnDonor').textContent = t.bnDonor;
+    document.getElementById('bnFind').textContent = t.bnFind;
+    document.getElementById('bnDash').textContent = t.bnDash;
+    var gpsBtn = document.getElementById('gpsBtn');
+    if (gpsBtn && !gpsBtn.disabled) document.getElementById('gpsBtnText').textContent = t.gpsBtnText;
     var confBtn = document.querySelector('#voiceStep3 .btn-confirm');
     var retryBtn = document.querySelector('#voiceStep3 .btn-retry');
-    if (confBtn) confBtn.textContent = t.confirmSubmit;
-    if (retryBtn) retryBtn.textContent = t.retry;
+    if (confBtn) confBtn.innerHTML = '&#9989; ' + t.confirmText;
+    if (retryBtn) retryBtn.innerHTML = '&#128260; ' + t.retryText;
 }
 
-// =========================
-// VOICE ENGINE
-// =========================
+function selectPriority(el) {
+    document.querySelectorAll('.priority-option').forEach(function(o) { o.classList.remove('selected'); });
+    el.classList.add('selected');
+    document.getElementById('priority').value = el.getAttribute('data-val');
+}
 
 var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 var recognition = null;
 var voiceState = 'idle';
-var extractedData = { patient_name: '', blood_group: '', location: '', hospital: '', contact: '' };
-var confirmationUtterance = null;
+var extractedData = { patient_name: '', blood_group: '', location: '', hospital: '', contact: '', priority: 'Normal' };
 
 function initRecognition() {
     if (!SpeechRecognition) {
@@ -389,101 +636,71 @@ function initRecognition() {
     r.interimResults = true;
     r.lang = (currentLang === 'ta') ? 'ta-IN' : 'en-IN';
     r.maxAlternatives = 1;
-
     r.onstart = function() {
         voiceState = 'listening';
         document.getElementById('mainMicBtn').classList.add('listening');
         document.getElementById('micRing').classList.add('listening');
         document.getElementById('micLabel').textContent = T[currentLang].micListening;
-        document.getElementById('transcriptBox').querySelector('.tc-text').textContent = '';
-        document.getElementById('transcriptBox').querySelector('.tc-text').classList.remove('placeholder');
-        var vsIcon = document.getElementById('vsIcon1');
-        vsIcon.className = 'vs-icon listening';
-        vsIcon.innerHTML = '\uD83C\uDFA4';
-        document.getElementById('step1Sub').textContent = 'Listening to your request\u2026';
+        var tc = document.getElementById('tcText1');
+        tc.textContent = '';
+        tc.classList.remove('placeholder');
+        var icon = document.getElementById('vsIcon1');
+        icon.className = 'vs-icon listening';
+        icon.innerHTML = '&#127908;';
+        document.getElementById('step1Sub').textContent = 'Listening...';
     };
-
-    r.onresult = function(event) {
-        var final = '';
-        var interim = '';
-        for (var i = event.resultIndex; i < event.results.length; i++) {
-            if (event.results[i].isFinal) {
-                final += event.results[i][0].transcript;
-            } else {
-                interim += event.results[i][0].transcript;
-            }
+    r.onresult = function(ev) {
+        var final = '', interim = '';
+        for (var i = ev.resultIndex; i < ev.results.length; i++) {
+            if (ev.results[i].isFinal) final += ev.results[i][0].transcript;
+            else interim += ev.results[i][0].transcript;
         }
-        var tcText = document.getElementById('transcriptBox').querySelector('.tc-text');
-        if (final) {
-            tcText.textContent = final;
-        } else if (interim) {
-            tcText.textContent = interim + '\u2026';
-        }
+        var tc = document.getElementById('tcText1');
+        if (final) tc.textContent = final;
+        else if (interim) tc.textContent = interim + '...';
     };
-
-    r.onerror = function(event) {
-        console.error('Speech error:', event.error);
-        if (event.error === 'no-speech' || event.error === 'audio-capture') {
+    r.onerror = function(ev) {
+        if (ev.error === 'no-speech' || ev.error === 'audio-capture') {
             alert(T[currentLang].noSpeech);
             stopListening();
-        } else if (event.error === 'not-allowed') {
+        } else if (ev.error === 'not-allowed') {
             alert('Microphone permission denied.');
             stopListening();
         }
     };
-
-    r.onend = function() {
-        if (voiceState === 'listening') {
-            stopListening();
-        }
-    };
-
+    r.onend = function() { if (voiceState === 'listening') stopListening(); };
     return r;
 }
 
 function startListening() {
-    if (voiceState === 'listening' || voiceState === 'processing') {
-        stopListening();
-        return;
-    }
+    if (voiceState === 'listening' || voiceState === 'processing') { stopListening(); return; }
     recognition = initRecognition();
     if (!recognition) return;
-    try {
-        recognition.start();
-    } catch (e) {
-    }
+    try { recognition.start(); } catch(e) {}
 }
 
 function stopListening() {
     voiceState = 'processing';
     document.getElementById('mainMicBtn').classList.remove('listening');
     document.getElementById('micRing').classList.remove('listening');
-    if (recognition) {
-        try { recognition.stop(); } catch(e) {}
-    }
-    var tcText = document.getElementById('transcriptBox').querySelector('.tc-text');
-    var text = tcText.textContent.trim();
-    if (!text || text.length < 5) {
+    if (recognition) { try { recognition.stop(); } catch(e) {} }
+    var tc = document.getElementById('tcText1');
+    var text = tc.textContent.trim();
+    if (!text || text.length < 3) {
         voiceState = 'idle';
         document.getElementById('micLabel').textContent = T[currentLang].micTap;
-        tcText.textContent = T[currentLang].micHint;
-        tcText.classList.add('placeholder');
-        var vsIcon = document.getElementById('vsIcon1');
-        vsIcon.className = 'vs-icon ready';
-        vsIcon.innerHTML = '\u25CF';
+        tc.textContent = T[currentLang].micHint;
+        tc.classList.add('placeholder');
+        var icon = document.getElementById('vsIcon1');
+        icon.className = 'vs-icon ready';
+        icon.innerHTML = '&#9679;';
         document.getElementById('step1Sub').textContent = T[currentLang].step1Sub;
         return;
     }
     showVoiceStep(2);
-    var tc2Text = document.getElementById('transcriptBox2').querySelector('.tc-text');
-    tc2Text.textContent = text;
-    tc2Text.classList.remove('placeholder');
+    document.getElementById('tcText2').textContent = text;
     processTranscript(text);
 }
-
-// =========================
-// TEXT EXTRACTION
-// =========================
 
 var bloodGroupPatterns = {
     'a positive': 'A+', 'a plus': 'A+', 'a p l u s': 'A+',
@@ -503,53 +720,41 @@ var bloodGroupPatterns = {
     '\u0B93 \u0BB4\u0BBF\u0B95\u0BBE\u0BCD\u0BB8\u0BCD': 'O+',
     '\u0B93 \u0BAE\u0BC8\u0BA9\u0B9A\u0BC1': 'O-'
 };
-
 var bloodGroupDirect = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 var phonePattern = /(\d[\d\s\-]{7,14}\d)/;
 var hospitalKeywordsEn = ['hospital', 'medical', 'clinic', 'center', 'centre', 'nursing', 'health'];
-var hospitalKeywordsTa = ['\u0BAE\u0BB0\u0BC1\u0BA4\u0BCD\u0BA4\u0BB5\u0BBE\u0B9A\u0B9A\u0BBE\u0BB2\u0BCD', '\u0B8E\u0BCB\u0BB2\u0B95\u0BBE\u0BA9\u0BAE\u0BCD', '\u0B9A\u0BBF\u0BB2\u0BBF\u0B95\u0BCD\u0B95\u0B9E\u0BCD\u0B9A\u0BBF\u0BBF'];
+var hospitalKeywordsTa = ['\u0BAE\u0BB0\u0BC1\u0BA4\u0BCd\u0BA4\u0BB5\u0BBE\u0B9A\u0B9A\u0BBE\u0BB2\u0BCD', '\u0B8E\u0BCB\u0BB2\u0B95\u0BBE\u0BA9\u0BAE\u0BCD', '\u0B9A\u0BBF\u0BB2\u0BBF\u0B95\u0BCd\u0B95\u0B9E\u0BCd\u0B9A\u0BBF\u0BBF'];
 
 function processTranscript(text) {
     var lower = text.toLowerCase().trim();
-    var data = { patient_name: '', blood_group: '', location: '', hospital: '', contact: '' };
+    var data = { patient_name: '', blood_group: '', location: '', hospital: '', contact: '', priority: 'Normal' };
 
     for (var key in bloodGroupPatterns) {
-        if (lower.indexOf(key) !== -1) {
-            data.blood_group = bloodGroupPatterns[key];
-            break;
-        }
+        if (lower.indexOf(key) !== -1) { data.blood_group = bloodGroupPatterns[key]; break; }
     }
     if (!data.blood_group) {
         for (var i = 0; i < bloodGroupDirect.length; i++) {
-            if (lower.indexOf(bloodGroupDirect[i].toLowerCase()) !== -1) {
-                data.blood_group = bloodGroupDirect[i];
-                break;
-            }
+            if (lower.indexOf(bloodGroupDirect[i].toLowerCase()) !== -1) { data.blood_group = bloodGroupDirect[i]; break; }
         }
     }
+
+    if (lower.indexOf('critical') !== -1 || lower.indexOf('\u0B85\u0BB5\u0BB8\u0BBF\u0BAF\u0BAE\u0BCD') !== -1) data.priority = 'Critical';
+    else if (lower.indexOf('high') !== -1 || lower.indexOf('\u0B89\u0BAF\u0BB0\u0BCD\u0BAA\u0BCD\u0BAA\u0BBF\u0BAE\u0BCD') !== -1) data.priority = 'High';
 
     var phoneMatch = text.match(phonePattern);
-    if (phoneMatch) {
-        data.contact = phoneMatch[1].replace(/[\s\-]/g, '');
-    }
+    if (phoneMatch) data.contact = phoneMatch[1].replace(/[\s\-]/g, '');
 
     var hospitalIdx = -1;
-    for (var j = 0; j < hospitalKeywordsEn.length; j++) {
-        hospitalIdx = lower.indexOf(hospitalKeywordsEn[j]);
-        if (hospitalIdx !== -1) break;
-    }
+    for (var j = 0; j < hospitalKeywordsEn.length; j++) { hospitalIdx = lower.indexOf(hospitalKeywordsEn[j]); if (hospitalIdx !== -1) break; }
     if (hospitalIdx === -1) {
-        for (var k = 0; k < hospitalKeywordsTa.length; k++) {
-            hospitalIdx = lower.indexOf(hospitalKeywordsTa[k]);
-            if (hospitalIdx !== -1) break;
-        }
+        for (var k = 0; k < hospitalKeywordsTa.length; k++) { hospitalIdx = lower.indexOf(hospitalKeywordsTa[k]); if (hospitalIdx !== -1) break; }
     }
     if (hospitalIdx !== -1) {
         var hospEnd = lower.length;
         if (data.contact) {
-            var contactIdx = lower.indexOf(data.contact);
-            if (contactIdx === -1) contactIdx = lower.indexOf(data.contact.toLowerCase());
-            if (contactIdx !== -1) hospEnd = contactIdx;
+            var cIdx = lower.indexOf(data.contact);
+            if (cIdx === -1) cIdx = lower.indexOf(data.contact.toLowerCase());
+            if (cIdx !== -1) hospEnd = cIdx;
         }
         data.hospital = text.substring(hospitalIdx, hospEnd).trim();
     }
@@ -559,170 +764,95 @@ function processTranscript(text) {
         var seg = segments[s].trim();
         if (!seg) continue;
         var segLower = seg.toLowerCase();
-
         var hasBlood = false;
-        for (var bg in bloodGroupPatterns) {
-            if (segLower.indexOf(bg) !== -1) { hasBlood = true; break; }
-        }
-        if (!hasBlood) {
-            for (var d = 0; d < bloodGroupDirect.length; d++) {
-                if (segLower.indexOf(bloodGroupDirect[d].toLowerCase()) !== -1) { hasBlood = true; break; }
-            }
-        }
+        for (var bg in bloodGroupPatterns) { if (segLower.indexOf(bg) !== -1) { hasBlood = true; break; } }
+        if (!hasBlood) { for (var d = 0; d < bloodGroupDirect.length; d++) { if (segLower.indexOf(bloodGroupDirect[d].toLowerCase()) !== -1) { hasBlood = true; break; } } }
         if (hasBlood || phonePattern.test(seg)) continue;
-
         if (data.hospital && segLower.indexOf(data.hospital.toLowerCase().substring(0, 6)) !== -1) continue;
-
         var isLocation = false;
-        var locWords = ['area', 'road', 'street', 'nagar', 'puri', 'town', 'city', 'pudukkottai', 'madurai', 'chennai', 'coimbatore', 'trichy'];
-        for (var w = 0; w < locWords.length; w++) {
-            if (segLower.indexOf(locWords[w]) !== -1) { isLocation = true; break; }
-        }
-
-        if (!data.patient_name && !isLocation) {
-            data.patient_name = seg;
-        } else if (!data.location) {
-            data.location = seg;
-        } else if (!data.patient_name) {
-            data.patient_name = seg;
-        }
+        var locWords = ['area', 'road', 'street', 'nagar', 'town', 'city', 'madurai', 'chennai', 'coimbatore', 'trichy', 'salem'];
+        for (var w = 0; w < locWords.length; w++) { if (segLower.indexOf(locWords[w]) !== -1) { isLocation = true; break; } }
+        if (!data.patient_name && !isLocation) data.patient_name = seg;
+        else if (!data.location) data.location = seg;
+        else if (!data.patient_name) data.patient_name = seg;
     }
 
     if (!data.patient_name && text.length > 0) {
         var words = text.split(/\s+/);
-        if (words.length >= 2) {
-            data.patient_name = words[0];
-        }
+        if (words.length >= 2) data.patient_name = words[0];
     }
     if (!data.patient_name) data.patient_name = text.substring(0, Math.min(30, text.length));
 
     extractedData = data;
-    setTimeout(function() { showConfirmStep(); }, 800);
+    setTimeout(showConfirmStep, 600);
 }
 
-// =========================
-// VOICE STEPS UI
-// =========================
-
 function showVoiceStep(step) {
-    var ids = ['voiceStep1', 'voiceStep2', 'voiceStep3', 'voiceStep4'];
-    for (var i = 0; i < ids.length; i++) {
-        document.getElementById(ids[i]).classList.remove('active');
-    }
+    for (var i = 1; i <= 4; i++) document.getElementById('voiceStep' + i).classList.remove('active');
     document.getElementById('voiceStep' + step).classList.add('active');
-    if (step !== 4) {
-        document.getElementById('manualFormSection').style.display = 'none';
-    }
+    if (step !== 4) document.getElementById('manualFormSection').style.display = 'none';
 }
 
 function showConfirmStep() {
     showVoiceStep(3);
     var t = T[currentLang];
     var d = extractedData;
-    var icons = {
-        patient_name: '\uD83D\uDC64',
-        blood_group: '\uD83E\uDE78',
-        location: '\uD83D\uDCCD',
-        hospital: '\uD83C\uDFE5',
-        contact: '\uD83D\uDCDE'
-    };
-    var labels = {
-        patient_name: t.patientName,
-        blood_group: t.bloodGroup,
-        location: t.location,
-        hospital: t.hospital,
-        contact: t.contact
-    };
-    var iconClasses = {
-        patient_name: 'patient',
-        blood_group: 'blood',
-        location: 'location',
-        hospital: 'hospital',
-        contact: 'contact'
-    };
+    var icons = { patient_name: '&#128100;', blood_group: '&#129656;', location: '&#128205;', hospital: '&#127973;', contact: '&#128222;', priority: '&#9888;' };
+    var labels = { patient_name: t.patient, blood_group: t.blood, location: t.loc, hospital: t.hosp, contact: t.contact, priority: t.prio };
+    var iconClasses = { patient_name: 'patient', blood_group: 'blood', location: 'location', hospital: 'hospital', contact: 'contact', priority: 'priority' };
     var html = '';
-    var fields = ['patient_name', 'blood_group', 'location', 'hospital', 'contact'];
+    var fields = ['patient_name', 'blood_group', 'location', 'hospital', 'contact', 'priority'];
     for (var i = 0; i < fields.length; i++) {
         var f = fields[i];
         var val = d[f] || '';
         var valClass = val ? '' : ' empty';
         var displayVal = val || '\u2014';
-        html += '<div class="detail-card">' +
-            '<div class="dc-icon ' + iconClasses[f] + '">' + icons[f] + '</div>' +
-            '<div class="dc-info">' +
-            '<div class="dc-label">' + labels[f] + '</div>' +
-            '<div class="dc-value' + valClass + '">' + displayVal + '</div>' +
-            '</div></div>';
+        html += '<div class="detail-card"><div class="dc-icon ' + iconClasses[f] + '">' + icons[f] + '</div><div class="dc-info"><div class="dc-label">' + labels[f] + '</div><div class="dc-value' + valClass + '">' + displayVal + '</div></div></div>';
     }
     document.getElementById('detailCards').innerHTML = html;
 
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        var msg = t.voiceConfirmPrefix + d.patient_name + t.voiceConfirmSuffix;
-        if (currentLang === 'ta') {
-            msg = '\u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95 \u0B89\u0BB1\u0BBF\u0BAF\u0BB8\u0BCd\u0BAA\u0B9F\u0BCd\u0B9F\u0BBF\u0BA9\u0BCd\u0B95. \u0BA8\u0BCB\u0B9F\u0BCd\u0B9F \u0BAA\u0BC6\u0BB0\u0BCd\u0BA4\u0BBE\u0BB0\u0BCD ' + d.patient_name + '. \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95 \u0B9A\u0BC7\u0B95\u0BC0\u0BBF\u0BBF\u0BAE\u0BCD.';
-        }
-        confirmationUtterance = new SpeechSynthesisUtterance(msg);
-        confirmationUtterance.lang = (currentLang === 'ta') ? 'ta-IN' : 'en-IN';
-        confirmationUtterance.rate = 1;
-        window.speechSynthesis.speak(confirmationUtterance);
+        var msg = (currentLang === 'ta') ? '\u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95 \u0B89\u0BB1\u0BBF\u0BAF\u0BB8\u0BCd\u0BAA\u0B9F\u0BCd\u0B9F\u0BBF\u0BA9\u0BCd\u0B95. \u0BA8\u0BCB\u0B9F\u0BCd\u0B9F \u0BAA\u0BC6\u0BB0\u0BCd\u0BA4\u0BBE\u0BB0\u0BCD ' + d.patient_name + '.' : 'Emergency request confirmed. Patient ' + d.patient_name + '.';
+        var utter = new SpeechSynthesisUtterance(msg);
+        utter.lang = (currentLang === 'ta') ? 'ta-IN' : 'en-IN';
+        utter.rate = 1;
+        window.speechSynthesis.speak(utter);
     }
 }
 
 function retryVoice() {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-    extractedData = { patient_name: '', blood_group: '', location: '', hospital: '', contact: '' };
-    var tc1 = document.getElementById('transcriptBox').querySelector('.tc-text');
-    tc1.textContent = T[currentLang].micHint;
-    tc1.classList.add('placeholder');
-    var tc2 = document.getElementById('transcriptBox2').querySelector('.tc-text');
-    tc2.textContent = 'Processing\u2026';
-    tc2.classList.add('placeholder');
+    extractedData = { patient_name: '', blood_group: '', location: '', hospital: '', contact: '', priority: 'Normal' };
+    var tc = document.getElementById('tcText1');
+    tc.textContent = T[currentLang].micHint;
+    tc.classList.add('placeholder');
+    document.getElementById('tcText2').textContent = 'Processing...';
     voiceState = 'idle';
     document.getElementById('micLabel').textContent = T[currentLang].micTap;
-    var vsIcon = document.getElementById('vsIcon1');
-    vsIcon.className = 'vs-icon ready';
-    vsIcon.innerHTML = '\u25CF';
+    var icon = document.getElementById('vsIcon1');
+    icon.className = 'vs-icon ready';
+    icon.innerHTML = '&#9679;';
     document.getElementById('step1Sub').textContent = T[currentLang].step1Sub;
     showVoiceStep(1);
 }
-
-// =========================
-// CONFIRM & SUBMIT
-// =========================
 
 async function confirmAndSubmit() {
     voiceState = 'done';
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     showVoiceStep(4);
-
     var d = extractedData;
-    var payload = {
-        patient_name: d.patient_name || '',
-        blood_group: d.blood_group || '',
-        location: d.location || '',
-        hospital: d.hospital || '',
-        contact: d.contact || ''
-    };
-
+    var payload = { patient_name: d.patient_name || '', blood_group: d.blood_group || '', location: d.location || '', hospital: d.hospital || '', contact: d.contact || '', priority: d.priority || 'Normal' };
     var statusEl = document.getElementById('voiceStatusMsg');
     statusEl.className = 'status-msg';
     statusEl.textContent = T[currentLang].submitting;
     document.getElementById('successScreen').style.display = 'none';
-
     try {
-        var response = await fetch('/emergency-requests', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        var result = await response.json();
-
-        if (!response.ok) {
+        var resp = await fetch('/emergency-requests', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        var result = await resp.json();
+        if (!resp.ok) {
             var errMsg = T[currentLang].submitFailed;
-            if (result.detail && Array.isArray(result.detail)) {
-                errMsg = result.detail[0].msg || errMsg;
-            }
+            if (result.detail && Array.isArray(result.detail)) errMsg = result.detail[0].msg || errMsg;
             statusEl.className = 'status-msg error';
             statusEl.textContent = errMsg;
         } else {
@@ -731,7 +861,7 @@ async function confirmAndSubmit() {
             document.getElementById('successScreen').style.display = 'block';
             loadRequests();
         }
-    } catch (err) {
+    } catch(err) {
         statusEl.className = 'status-msg error';
         statusEl.textContent = T[currentLang].somethingWrong;
     }
@@ -739,155 +869,145 @@ async function confirmAndSubmit() {
 
 function resetVoiceFlow() {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-    extractedData = { patient_name: '', blood_group: '', location: '', hospital: '', contact: '' };
-    var tc1 = document.getElementById('transcriptBox').querySelector('.tc-text');
-    tc1.textContent = T[currentLang].micHint;
-    tc1.classList.add('placeholder');
-    var tc2 = document.getElementById('transcriptBox2').querySelector('.tc-text');
-    tc2.textContent = 'Processing\u2026';
-    tc2.classList.add('placeholder');
+    extractedData = { patient_name: '', blood_group: '', location: '', hospital: '', contact: '', priority: 'Normal' };
+    var tc = document.getElementById('tcText1');
+    tc.textContent = T[currentLang].micHint;
+    tc.classList.add('placeholder');
+    document.getElementById('tcText2').textContent = 'Processing...';
     voiceState = 'idle';
     document.getElementById('micLabel').textContent = T[currentLang].micTap;
     document.getElementById('voiceStatusMsg').textContent = '';
     document.getElementById('voiceStatusMsg').className = 'status-msg';
     document.getElementById('successScreen').style.display = 'none';
-    var vsIcon = document.getElementById('vsIcon1');
-    vsIcon.className = 'vs-icon ready';
-    vsIcon.innerHTML = '\u25CF';
+    var icon = document.getElementById('vsIcon1');
+    icon.className = 'vs-icon ready';
+    icon.innerHTML = '&#9679;';
     document.getElementById('step1Sub').textContent = T[currentLang].step1Sub;
     showVoiceStep(1);
 }
-
-// =========================
-// MANUAL FORM TOGGLE
-// =========================
 
 function showManualForm() {
     document.getElementById('manualFormSection').style.display = 'block';
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
 }
+function hideManualForm() { document.getElementById('manualFormSection').style.display = 'none'; }
 
-function hideManualForm() {
-    document.getElementById('manualFormSection').style.display = 'none';
-}
-
-// =========================
-// CREATE EMERGENCY REQUEST (manual)
-// =========================
-
-document.getElementById('emergencyForm').addEventListener('submit', async function(event) {
-    event.preventDefault();
+document.getElementById('emergencyForm').addEventListener('submit', async function(ev) {
+    ev.preventDefault();
     document.querySelectorAll('.field-error').forEach(function(el) { el.classList.remove('show'); });
-
     var requestData = {
         patient_name: document.getElementById('patient_name').value,
         blood_group: document.getElementById('blood_group').value,
         location: document.getElementById('location').value,
         hospital: document.getElementById('hospital').value,
-        contact: document.getElementById('contact').value
+        contact: document.getElementById('contact').value,
+        priority: document.getElementById('priority').value || 'Normal'
     };
-
     var submitBtn = document.getElementById('submitBtn');
     submitBtn.disabled = true;
-    submitBtn.textContent = T[currentLang].submitting;
-
+    document.getElementById('submitText').textContent = T[currentLang].submitting;
     try {
-        var response = await fetch('/emergency-requests', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestData)
-        });
-        var result = await response.json();
-
-        if (!response.ok) {
-            if (result.detail && Array.isArray(result.detail)) {
-                result.detail.forEach(function(err) {
-                    var field = err.loc[err.loc.length - 1];
-                    var errorEl = document.getElementById(field + '_error');
-                    if (errorEl) {
-                        errorEl.textContent = err.msg;
-                        errorEl.classList.add('show');
-                    }
-                });
-            }
-            document.getElementById('message').innerText = result.detail && result.detail[0] ? result.detail[0].msg : T[currentLang].submitFailed;
+        var resp = await fetch('/emergency-requests', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(requestData) });
+        var result = await resp.json();
+        var msg = document.getElementById('message');
+        if (!resp.ok) {
+            msg.className = 'status-msg error';
+            msg.textContent = result.detail && result.detail[0] ? result.detail[0].msg : T[currentLang].submitFailed;
         } else {
-            document.getElementById('message').innerText = result.message || T[currentLang].submittedSuccess;
+            msg.className = 'status-msg success';
+            msg.textContent = T[currentLang].submittedSuccess;
             document.getElementById('emergencyForm').reset();
+            document.querySelectorAll('.priority-option').forEach(function(o) { o.classList.remove('selected'); });
+            document.getElementById('priority').value = 'Normal';
             loadRequests();
         }
-    } catch (error) {
-        document.getElementById('message').innerText = T[currentLang].somethingWrong;
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = T[currentLang].submitEmergency;
+    } catch(err) {
+        document.getElementById('message').className = 'status-msg error';
+        document.getElementById('message').textContent = T[currentLang].somethingWrong;
     }
+    submitBtn.disabled = false;
+    document.getElementById('submitText').textContent = T[currentLang].submitText;
 });
 
-// =========================
-// LOAD EMERGENCY REQUESTS
-// =========================
-
 async function loadRequests() {
+    var t = T[currentLang];
     try {
-        var response = await fetch('/emergency-requests');
-        var requests = await response.json();
-        var requestList = document.getElementById('requestList');
-        var t = T[currentLang];
-        requestList.innerHTML = '';
-
+        var resp = await fetch('/emergency-requests');
+        var requests = await resp.json();
+        var container = document.getElementById('requestList');
+        container.innerHTML = '';
         if (requests.length === 0) {
-            requestList.innerHTML = '<p>' + t.noRequests + '</p>';
+            container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128680;</div><div class="empty-state-text">' + t.noRequests + '</div></div>';
             return;
         }
-
-        requests.forEach(function(request) {
+        requests.forEach(function(req) {
             var card = document.createElement('div');
             card.className = 'request-card';
-            var statusClass = request.status.toLowerCase();
-
+            var statusClass = (req.status || '').toLowerCase();
+            var priorityClass = (req.priority || 'normal').toLowerCase();
+            var priorityLabel = req.priority || 'Normal';
             card.innerHTML =
-                '<p><strong>' + t.id + ':</strong> ' + request.id + '</p>' +
-                '<p><strong>' + t.patient + ':</strong> ' + request.patient_name + '</p>' +
-                '<p><strong>' + t.blood + ':</strong> ' + request.blood_group + '</p>' +
-                '<p><strong>' + t.loc + ':</strong> ' + request.location + '</p>' +
-                '<p><strong>' + t.hosp + ':</strong> ' + request.hospital + '</p>' +
-                '<p><strong>' + t.phone + ':</strong> ' + request.contact + '</p>' +
-                '<p class="status ' + statusClass + '">' + t.status + ': ' + request.status + '</p>' +
-                '<button class="status-button" onclick="changeStatus(' + request.id + ', \'Matched\')">' + t.markMatched + '</button>' +
-                '<button class="status-button" onclick="changeStatus(' + request.id + ', \'Completed\')">' + t.markCompleted + '</button>';
-
-            requestList.appendChild(card);
+                '<p><strong>' + t.id + ':</strong> #' + req.id + ' <span class="request-priority ' + priorityClass + '">' + priorityLabel + '</span></p>' +
+                '<p><strong>' + t.patient + ':</strong> ' + req.patient_name + '</p>' +
+                '<p><strong>' + t.blood + ':</strong> ' + req.blood_group + '</p>' +
+                '<p><strong>' + t.loc + ':</strong> ' + req.location + '</p>' +
+                '<p><strong>' + t.hosp + ':</strong> ' + req.hospital + '</p>' +
+                '<p><strong>' + t.contact + ':</strong> ' + req.contact + '</p>' +
+                '<p class="request-status ' + statusClass + '">' + t.status + ': ' + req.status + '</p>' +
+                '<button class="status-btn" onclick="changeStatus(' + req.id + ', \'Matched\')">' + t.markMatched + '</button>' +
+                '<button class="status-btn" onclick="changeStatus(' + req.id + ', \'Completed\')">' + t.markCompleted + '</button>';
+            container.appendChild(card);
         });
-    } catch (error) {
-        document.getElementById('requestList').innerHTML = '<p>' + T[currentLang].unableToLoad + '</p>';
+    } catch(err) {
+        document.getElementById('requestList').innerHTML = '<div class="empty-state"><div class="empty-state-text">' + t.unableToLoad + '</div></div>';
     }
 }
 
-// =========================
-// CHANGE REQUEST STATUS
-// =========================
-
-async function changeStatus(requestId, newStatus) {
+async function changeStatus(reqId, newStatus) {
+    var t = T[currentLang];
     try {
-        var response = await fetch('/emergency-requests/' + requestId + '/status?status=' + newStatus, {
-            method: 'PUT'
-        });
-        var result = await response.json();
-        alert(result.message);
+        var resp = await fetch('/emergency-requests/' + reqId + '/status?status=' + newStatus, { method: 'PUT' });
+        var result = await resp.json();
         loadRequests();
-    } catch (error) {
-        alert(T[currentLang].unableToUpdate);
+    } catch(err) {
+        alert(t.unableToUpdate);
     }
 }
 
-// =========================
-// INIT
-// =========================
+function useMyLocation() {
+    var gpsBtn = document.getElementById('gpsBtn');
+    var gpsCoords = document.getElementById('gpsCoords');
+    var locationInput = document.getElementById('location');
+    var t = T[currentLang];
+    if (!navigator.geolocation) { gpsCoords.textContent = t.gpsDefault; gpsCoords.className = 'gps-coords error'; return; }
+    gpsBtn.disabled = true;
+    document.getElementById('gpsBtnText').textContent = t.gpsGetting;
+    gpsCoords.textContent = '';
+    gpsCoords.className = 'gps-coords';
+    navigator.geolocation.getCurrentPosition(
+        function(pos) {
+            var lat = pos.coords.latitude, lng = pos.coords.longitude;
+            var display = lat.toFixed(6) + ', ' + lng.toFixed(6);
+            locationInput.value = display;
+            gpsCoords.textContent = t.gpsDetected + display;
+            gpsCoords.className = 'gps-coords';
+            gpsBtn.disabled = false;
+            document.getElementById('gpsBtnText').textContent = t.gpsBtnText;
+        },
+        function(err) {
+            var msg = '';
+            switch(err.code) { case 1: msg = t.gpsPermDenied; break; case 2: msg = t.gpsUnavailable; break; case 3: msg = t.gpsTimeout; break; default: msg = t.gpsDefault; }
+            gpsCoords.textContent = msg;
+            gpsCoords.className = 'gps-coords error';
+            gpsBtn.disabled = false;
+            document.getElementById('gpsBtnText').textContent = t.gpsBtnText;
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+}
 
 applyLang();
 loadRequests();
 </script>
-
 </body>
 </html>

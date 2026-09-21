@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Blood Donation Network</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            color: #1a1a2e;
+        }
+
+        .top-bar {
+            background: linear-gradient(135deg, #b71c1c 0%, #c62828 50%, #d32f2f 100%);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 56px;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            box-shadow: 0 2px 12px rgba(183,28,28,0.25);
+        }
+        .top-bar-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .top-bar-icon { width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .top-bar-title { color: white; font-size: 1rem; font-weight: 700; }
+        .lang-toggle { display: flex; background: rgba(255,255,255,0.15); border-radius: 20px; padding: 2px; }
+        .lang-btn { padding: 5px 14px; border: none; border-radius: 18px; font-size: 0.72rem; font-weight: 700; cursor: pointer; background: transparent; color: rgba(255,255,255,0.65); transition: all 0.2s; }
+        .lang-btn.active { background: white; color: #b71c1c; }
+
+        .container { max-width: 720px; margin: 0 auto; padding: 16px 16px 90px; }
+
+        .page-title { font-size: 1.4rem; font-weight: 800; color: #1a1a2e; margin-bottom: 4px; }
+        .page-subtitle { font-size: 0.85rem; color: #888; margin-bottom: 20px; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .stat-icon { font-size: 1.5rem; margin-bottom: 6px; }
+        .stat-value { font-size: 1.8rem; font-weight: 800; color: #1a1a2e; line-height: 1; }
+        .stat-label { font-size: 0.72rem; color: #999; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+
+        .stat-card.red { border-left: 4px solid #b71c1c; }
+        .stat-card.green { border-left: 4px solid #4caf50; }
+        .stat-card.blue { border-left: 4px solid #2196f3; }
+        .stat-card.amber { border-left: 4px solid #ff9800; }
+        .stat-card.purple { border-left: 4px solid #9c27b0; }
+        .stat-card.teal { border-left: 4px solid #009688; }
+
+        .card { background: white; border-radius: 16px; padding: 18px; margin-bottom: 12px; box-shadow: 0 1px 8px rgba(0,0,0,0.05); }
+        .section-title { font-size: 0.78rem; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+        .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+        .bar-row { display: flex; align-items: center; gap: 10px; }
+        .bar-label { font-size: 0.78rem; font-weight: 600; color: #555; width: 120px; flex-shrink: 0; }
+        .bar-track { flex: 1; height: 24px; background: #f0f0f0; border-radius: 12px; overflow: hidden; position: relative; }
+        .bar-fill { height: 100%; border-radius: 12px; transition: width 0.6s ease; display: flex; align-items: center; padding-left: 10px; }
+        .bar-fill span { font-size: 0.72rem; font-weight: 700; color: white; white-space: nowrap; }
+        .bar-fill.red { background: linear-gradient(90deg, #c62828, #e53935); }
+        .bar-fill.green { background: linear-gradient(90deg, #2e7d32, #4caf50); }
+        .bar-fill.blue { background: linear-gradient(90deg, #1565c0, #2196f3); }
+        .bar-fill.amber { background: linear-gradient(90deg, #e65100, #ff9800); }
+        .bar-fill.purple { background: linear-gradient(90deg, #7b1fa2, #9c27b0); }
+        .bar-fill.teal { background: linear-gradient(90deg, #00796b, #009688); }
+
+        .quick-links { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .quick-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px;
+            background: #fafafa;
+            border-radius: 12px;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.15s;
+        }
+        .quick-link:hover { transform: translateY(-1px); background: #f0f0f0; }
+        .ql-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        .ql-icon.red { background: #ffebee; }
+        .ql-icon.blue { background: #e3f2fd; }
+        .ql-icon.green { background: #e8f5e9; }
+        .ql-icon.amber { background: #fff8e1; }
+        .ql-text { font-size: 0.82rem; font-weight: 600; color: #333; }
+
+        .loading { text-align: center; padding: 30px; color: #999; }
+        .spinner { width: 28px; height: 28px; border: 3px solid #eee; border-top-color: #b71c1c; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 8px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .back-link { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 16px auto; color: #b71c1c; text-decoration: none; font-weight: 600; font-size: 0.88rem; padding: 10px; border-radius: 10px; max-width: 720px; }
+        .back-link:hover { background: #ffebee; }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 16px rgba(0,0,0,0.08);
+            display: flex;
+            z-index: 200;
+            padding-bottom: env(safe-area-inset-bottom);
+            border-top: 1px solid #f0f0f0;
+        }
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 0 6px;
+            text-decoration: none;
+            color: #999;
+            font-size: 0.65rem;
+            font-weight: 600;
+            gap: 3px;
+            transition: color 0.2s;
+            position: relative;
+        }
+        .nav-item.active { color: #b71c1c; }
+        .nav-item.active::before { content: ''; position: absolute; top: 0; width: 24px; height: 3px; background: #b71c1c; border-radius: 0 0 3px 3px; }
+        .nav-icon { font-size: 1.25rem; line-height: 1; }
+
+        @media (min-width: 768px) {
+            .container { max-width: 640px; padding: 20px 24px 90px; }
+            .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="top-bar">
+    <a href="/" class="top-bar-brand">
+        <div class="top-bar-icon">&#129656;</div>
+        <span class="top-bar-title">Blood Donation Network</span>
+    </a>
+    <div class="lang-toggle">
+        <button id="langEn" class="lang-btn active" onclick="setLang('en')">EN</button>
+        <button id="langTa" class="lang-btn" onclick="setLang('ta')">&#3000;&#3021;&#2965;</button>
+    </div>
+</header>
+
+<div class="container">
+    <div class="page-title" id="pageTitle">Dashboard</div>
+    <div class="page-subtitle" id="pageSub">Overview of the blood donation network</div>
+
+    <div id="statsArea">
+        <div class="loading"><div class="spinner"></div><p>Loading statistics...</p></div>
+    </div>
+
+    <div class="card">
+        <div class="section-title" id="chartTitle">Network Overview</div>
+        <div class="bar-chart" id="barChart">
+            <div class="loading"><div class="spinner"></div></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="section-title" id="quickLinksTitle">Quick Actions</div>
+        <div class="quick-links">
+            <a href="/emergency" class="quick-link">
+                <div class="ql-icon red">&#129656;</div>
+                <div class="ql-text" id="qlEmg">Emergency Request</div>
+            </a>
+            <a href="/donor" class="quick-link">
+                <div class="ql-icon green">&#128100;</div>
+                <div class="ql-text" id="qlDonor">Register Donor</div>
+            </a>
+            <a href="/matching" class="quick-link">
+                <div class="ql-icon blue">&#128269;</div>
+                <div class="ql-text" id="qlFind">Find Donors</div>
+            </a>
+            <a href="/docs" class="quick-link">
+                <div class="ql-icon amber">&#128196;</div>
+                <div class="ql-text" id="qlApi">API Docs</div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<a href="/" class="back-link" id="backLink">&#8592; Back to Home</a>
+
+<nav class="bottom-nav">
+    <a href="/" class="nav-item"><span class="nav-icon">&#127968;</span><span id="bnHome">Home</span></a>
+    <a href="/emergency" class="nav-item"><span class="nav-icon">&#129656;</span><span id="bnEmg">Emergency</span></a>
+    <a href="/donor" class="nav-item"><span class="nav-icon">&#128100;</span><span id="bnDonor">Donor</span></a>
+    <a href="/matching" class="nav-item"><span class="nav-icon">&#128269;</span><span id="bnFind">Find</span></a>
+    <a href="/dashboard" class="nav-item active"><span class="nav-icon">&#128200;</span><span id="bnDash">Stats</span></a>
+</nav>
+
+<script>
+var curLang = 'en';
+var T = {
+    en: {
+        pageTitle: 'Dashboard',
+        pageSub: 'Overview of the blood donation network',
+        chartTitle: 'Network Overview',
+        quickLinksTitle: 'Quick Actions',
+        qlEmg: 'Emergency Request',
+        qlDonor: 'Register Donor',
+        qlFind: 'Find Donors',
+        qlApi: 'API Docs',
+        backLink: '\u2190 Back to Home',
+        totalDonors: 'Total Donors',
+        availableDonors: 'Available',
+        totalRequests: 'Total Requests',
+        pendingRequests: 'Pending',
+        matchedRequests: 'Matched',
+        completedRequests: 'Completed',
+        criticalRequests: 'Critical',
+        highRequests: 'High Priority',
+        bnHome: 'Home',
+        bnEmg: 'Emergency',
+        bnDonor: 'Donor',
+        bnFind: 'Find',
+        bnDash: 'Stats'
+    },
+    ta: {
+        pageTitle: '\u0B85\u0B9A\u0BBF\u0B95\u0BBF\u0BAA\u0BCD\u0BAA\u0B9F\u0BCd\u0BBF',
+        pageSub: '\u0B87\u0BB0\u0BA4\u0BCd\u0BA4\u0B95\u0BBE\u0BB0\u0BB0 \u0BAA\u0BBF\u0BB1\u0BC1\u0BAE\u0BBE\u0BB0 \u0BAA\u0BBE\u0BB0\u0BCD\u0B95\u0BB2\u0BBE\u0B95\u0BB1\u0BC1\u0B99\u0BCd\u0B95',
+        chartTitle: '\u0B9A\u0BC7\u0B9F\u0BBF \u0BAA\u0BBE\u0BB0\u0BCD\u0B95\u0BB2\u0BBE\u0B95\u0BB1\u0BC1\u0B99\u0BCd\u0B95',
+        quickLinksTitle: '\u0BB5\u0BBF\u0BB0\u0BC8\u0B9A \u0B9A\u0BC6\u0BAF\u0BB2\u0BC1\u0B95\u0BB3\u0BCD',
+        qlEmg: '\u0B85\u0BB5\u0B9A\u0BB0 \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95',
+        qlDonor: '\u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF \u0BAE\u0BB1\u0BBF\u0B9F\u0BAA\u0BCd\u0BAA\u0BBF\u0BB1\u0BC1\u0B99\u0BCd\u0B95',
+        qlFind: '\u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF\u0B95\u0BB3\u0BCD \u0BA4\u0BC7\u0B9F\u0BC1',
+        qlApi: '\u0B86\u0BAA\u0BBF \u0B9A\u0BBF\u0BBF\u0BBF\u0BB0\u0BAE\u0BCD',
+        backLink: '\u2190 \u0B8E\u0BB5\u0BB8\u0BBF\u0B95\u0BCD \u0BA4\u0BBF\u0BB0\u0BC1\u0B99\u0BCd\u0B95',
+        totalDonors: '\u0BAE\u0B9A\u0BCD\u0B9A \u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF\u0B95\u0BB3\u0BCD',
+        availableDonors: '\u0B95\u0BBF\u0B9F\u0BCd\u0BAA\u0BBF\u0B9F\u0BCD',
+        totalRequests: '\u0BAE\u0B9A\u0BCd\u0B9A \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95\u0B9F\u0BCD\u0B9F\u0BBF',
+        pendingRequests: '\u0BA8\u0BBF\u0BB2\u0BC8',
+        matchedRequests: '\u0BAA\u0BCA\u0BB0\u0BC1\u0BA4\u0BCd\u0B95\u0BC1',
+        completedRequests: '\u0BAE\u0BC1\u0B9F\u0BCB\u0BB1\u0B9F\u0BC1',
+        criticalRequests: '\u0B85\u0BB5\u0BB8\u0BBF\u0BAF\u0BAE\u0BCD',
+        highRequests: '\u0B89\u0BAF\u0BB0\u0BCD\u0BAA\u0BCD\u0BAA\u0BBF\u0BAE\u0BCD',
+        bnHome: '\u0B8E\u0BB5\u0BB8\u0BBF',
+        bnEmg: '\u0B85\u0BB5\u0B9A\u0BB0',
+        bnDonor: '\u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF',
+        bnFind: '\u0BA4\u0BC7\u0B9F\u0BC1',
+        bnDash: '\u0BAA\u0BBF\u0BB1\u0BC1\u0BAE\u0BBE\u0BB0\u0B99\u0BCd\u0B95\u0BB3\u0BCD'
+    }
+};
+
+function setLang(lang) {
+    curLang = lang;
+    document.getElementById('langEn').classList.toggle('active', lang === 'en');
+    document.getElementById('langTa').classList.toggle('active', lang === 'ta');
+    applyLang();
+}
+
+function applyLang() {
+    var t = T[curLang];
+    document.getElementById('pageTitle').textContent = t.pageTitle;
+    document.getElementById('pageSub').textContent = t.pageSub;
+    document.getElementById('chartTitle').textContent = t.chartTitle;
+    document.getElementById('quickLinksTitle').textContent = t.quickLinksTitle;
+    document.getElementById('qlEmg').textContent = t.qlEmg;
+    document.getElementById('qlDonor').textContent = t.qlDonor;
+    document.getElementById('qlFind').textContent = t.qlFind;
+    document.getElementById('qlApi').textContent = t.qlApi;
+    document.getElementById('backLink').textContent = t.backLink;
+    document.getElementById('bnHome').textContent = t.bnHome;
+    document.getElementById('bnEmg').textContent = t.bnEmg;
+    document.getElementById('bnDonor').textContent = t.bnDonor;
+    document.getElementById('bnFind').textContent = t.bnFind;
+    document.getElementById('bnDash').textContent = t.bnDash;
+}
+
+async function loadDashboard() {
+    var t = T[curLang];
+    try {
+        var resp = await fetch('/api/dashboard');
+        var d = await resp.json();
+
+        var statsHtml =
+            '<div class="stats-grid">' +
+                '<div class="stat-card red"><div class="stat-icon">&#128100;</div><div class="stat-value">' + d.total_donors + '</div><div class="stat-label">' + t.totalDonors + '</div></div>' +
+                '<div class="stat-card green"><div class="stat-icon">&#9989;</div><div class="stat-value">' + d.available_donors + '</div><div class="stat-label">' + t.availableDonors + '</div></div>' +
+                '<div class="stat-card blue"><div class="stat-icon">&#128680;</div><div class="stat-value">' + d.total_requests + '</div><div class="stat-label">' + t.totalRequests + '</div></div>' +
+                '<div class="stat-card amber"><div class="stat-icon">&#9203;</div><div class="stat-value">' + d.pending_requests + '</div><div class="stat-label">' + t.pendingRequests + '</div></div>' +
+                '<div class="stat-card purple"><div class="stat-icon">&#128279;</div><div class="stat-value">' + d.matched_requests + '</div><div class="stat-label">' + t.matchedRequests + '</div></div>' +
+                '<div class="stat-card teal"><div class="stat-icon">&#9989;</div><div class="stat-value">' + d.completed_requests + '</div><div class="stat-label">' + t.completedRequests + '</div></div>' +
+            '</div>';
+        document.getElementById('statsArea').innerHTML = statsHtml;
+
+        var maxVal = Math.max(d.total_donors, d.total_requests, 1);
+        function barW(val) { return Math.max(5, (val / maxVal) * 100) + '%'; }
+
+        var chartHtml =
+            '<div class="bar-row"><div class="bar-label">' + t.totalDonors + '</div><div class="bar-track"><div class="bar-fill red" style="width:' + barW(d.total_donors) + '"><span>' + d.total_donors + '</span></div></div></div>' +
+            '<div class="bar-row"><div class="bar-label">' + t.availableDonors + '</div><div class="bar-track"><div class="bar-fill green" style="width:' + barW(d.available_donors) + '"><span>' + d.available_donors + '</span></div></div></div>' +
+            '<div class="bar-row"><div class="bar-label">' + t.totalRequests + '</div><div class="bar-track"><div class="bar-fill blue" style="width:' + barW(d.total_requests) + '"><span>' + d.total_requests + '</span></div></div></div>' +
+            '<div class="bar-row"><div class="bar-label">' + t.pendingRequests + '</div><div class="bar-track"><div class="bar-fill amber" style="width:' + barW(d.pending_requests) + '"><span>' + d.pending_requests + '</span></div></div></div>' +
+            '<div class="bar-row"><div class="bar-label">' + t.matchedRequests + '</div><div class="bar-track"><div class="bar-fill purple" style="width:' + barW(d.matched_requests) + '"><span>' + d.matched_requests + '</span></div></div></div>' +
+            '<div class="bar-row"><div class="bar-label">' + t.completedRequests + '</div><div class="bar-track"><div class="bar-fill teal" style="width:' + barW(d.completed_requests) + '"><span>' + d.completed_requests + '</span></div></div></div>';
+        document.getElementById('barChart').innerHTML = chartHtml;
+
+    } catch(err) {
+        document.getElementById('statsArea').innerHTML = '<div class="card"><div class="loading">Unable to load dashboard.</div></div>';
+    }
+}
+
+applyLang();
+loadDashboard();
+</script>
+</body>
+</html>

@@ -1,7 +1,9 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from sqlalchemy import func
+import math
 
 from database import engine, Base, get_db
 import models
@@ -26,6 +28,8 @@ BLOOD_COMPATIBILITY = {
     "O-": ["O-"],
 }
 
+VALID_PRIORITIES = {"Critical", "High", "Normal"}
+
 
 def normalize_blood_group(bg: str) -> str:
     return bg.strip().upper()
@@ -38,14 +42,26 @@ def validate_blood_group(bg: str) -> str:
     return normalized
 
 
+def haversine_distance(lat1, lon1, lat2, lon2):
+    R = 6371.0
+    lat1_r = math.radians(lat1)
+    lon1_r = math.radians(lon1)
+    lat2_r = math.radians(lat2)
+    lon2_r = math.radians(lon2)
+    dlat = lat2_r - lat1_r
+    dlon = lon2_r - lon1_r
+    a = math.sin(dlat / 2) ** 2 + math.cos(lat1_r) * math.cos(lat2_r) * math.sin(dlon / 2) ** 2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return R * c
+
+
 app = FastAPI(
     title="Blood Donation Network and Emergency Matching Platform",
     description="A platform to connect blood donors with patients during emergencies.",
-    version="1.0.0"
+    version="2.0.0"
 )
 
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -54,10 +70,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# =========================
-# CREATE DATABASE TABLES
-# =========================
 
 Base.metadata.create_all(bind=engine)
 
@@ -99,6 +111,16 @@ def emergency_page():
 @app.get("/matching", response_class=HTMLResponse)
 def matching_page():
     with open("templates/matching.html", "r", encoding="utf-8") as file:
+        return file.read()
+
+
+# =========================
+# DASHBOARD PAGE
+# =========================
+
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard_page():
+    with open("templates/dashboard.html", "r", encoding="utf-8") as file:
         return file.read()
 
 
@@ -154,7 +176,9 @@ def create_donor(
         blood_group=normalized_bg,
         location=donor.location.strip(),
         phone=donor.phone.strip(),
-        available=donor.available
+        available=donor.available,
+        latitude=donor.latitude,
+        longitude=donor.longitude
     )
 
     db.add(new_donor)
@@ -179,7 +203,6 @@ def get_donors(
     db: Session = Depends(get_db)
 ):
     donors = db.query(models.Donor).all()
-
     return donors
 
 
@@ -203,7 +226,6 @@ def update_donor_availability(
         }
 
     donor.available = available
-
     db.commit()
     db.refresh(donor)
 
@@ -212,6 +234,37 @@ def update_donor_availability(
         "donor_id": donor.id,
         "name": donor.name,
         "available": donor.available
+    }
+
+
+# =========================
+# UPDATE DONOR GPS
+# =========================
+
+@app.put("/donors/{donor_id}/location")
+def update_donor_location(
+    donor_id: int,
+    latitude: float = Query(...),
+    longitude: float = Query(...),
+    db: Session = Depends(get_db)
+):
+    donor = db.query(models.Donor).filter(
+        models.Donor.id == donor_id
+    ).first()
+
+    if not donor:
+        return {"message": "Donor not found"}
+
+    donor.latitude = latitude
+    donor.longitude = longitude
+    db.commit()
+    db.refresh(donor)
+
+    return {
+        "message": "Donor location updated",
+        "donor_id": donor.id,
+        "latitude": donor.latitude,
+        "longitude": donor.longitude
     }
 
 
@@ -225,12 +278,20 @@ def create_emergency_request(
     db: Session = Depends(get_db)
 ):
     normalized_bg = validate_blood_group(request.blood_group)
+
+    priority = request.priority.strip()
+    if priority not in VALID_PRIORITIES:
+        priority = "Normal"
+
     new_request = models.EmergencyRequest(
         patient_name=request.patient_name.strip(),
         blood_group=normalized_bg,
         location=request.location.strip(),
         hospital=request.hospital.strip(),
-        contact=request.contact.strip()
+        contact=request.contact.strip(),
+        priority=priority,
+        latitude=request.latitude,
+        longitude=request.longitude
     )
 
     db.add(new_request)
@@ -244,7 +305,8 @@ def create_emergency_request(
         "blood_group": new_request.blood_group,
         "location": new_request.location,
         "hospital": new_request.hospital,
-        "status": new_request.status
+        "status": new_request.status,
+        "priority": new_request.priority
     }
 
 
@@ -256,15 +318,12 @@ def create_emergency_request(
 def get_emergency_requests(
     db: Session = Depends(get_db)
 ):
-    requests = db.query(
-        models.EmergencyRequest
-    ).all()
-
+    requests = db.query(models.EmergencyRequest).all()
     return requests
 
 
 # =========================
-# MATCH DONORS
+# MATCH DONORS (with distance)
 # =========================
 
 @app.get("/match/{request_id}")
@@ -272,7 +331,6 @@ def match_donors(
     request_id: int,
     db: Session = Depends(get_db)
 ):
-
     emergency_request = db.query(
         models.EmergencyRequest
     ).filter(
@@ -280,9 +338,7 @@ def match_donors(
     ).first()
 
     if not emergency_request:
-        return {
-            "message": "Emergency request not found"
-        }
+        return {"message": "Emergency request not found"}
 
     compatible_groups = BLOOD_COMPATIBILITY.get(emergency_request.blood_group, [])
 
@@ -290,17 +346,49 @@ def match_donors(
         models.Donor
     ).filter(
         models.Donor.blood_group.in_(compatible_groups),
-        models.Donor.location.ilike(emergency_request.location),
         models.Donor.available == True
     ).all()
+
+    results = []
+    req_lat = emergency_request.latitude
+    req_lng = emergency_request.longitude
+
+    for donor in matched_donors:
+        donor_data = {
+            "id": donor.id,
+            "name": donor.name,
+            "blood_group": donor.blood_group,
+            "location": donor.location,
+            "phone": donor.phone,
+            "available": donor.available,
+            "latitude": donor.latitude,
+            "longitude": donor.longitude,
+            "distance_km": None
+        }
+
+        if req_lat is not None and req_lng is not None and donor.latitude is not None and donor.longitude is not None:
+            dist = haversine_distance(req_lat, req_lng, donor.latitude, donor.longitude)
+            donor_data["distance_km"] = round(dist, 1)
+        elif req_lat is not None and req_lng is not None:
+            same_location = donor.location.strip().lower() == emergency_request.location.strip().lower()
+            if same_location:
+                donor_data["distance_km"] = 0.0
+            else:
+                donor_data["distance_km"] = 9999.0
+
+        results.append(donor_data)
+
+    results.sort(key=lambda d: (d["distance_km"] is None, d["distance_km"] or 9999))
 
     return {
         "request_id": emergency_request.id,
         "patient_name": emergency_request.patient_name,
         "blood_group": emergency_request.blood_group,
         "location": emergency_request.location,
+        "hospital": emergency_request.hospital,
+        "priority": emergency_request.priority,
         "compatible_groups": compatible_groups,
-        "matched_donors": matched_donors
+        "matched_donors": results
     }
 
 
@@ -321,23 +409,14 @@ def update_emergency_status(
     ).first()
 
     if not emergency_request:
-        return {
-            "message": "Emergency request not found"
-        }
+        return {"message": "Emergency request not found"}
 
-    allowed_status = [
-        "Pending",
-        "Matched",
-        "Completed"
-    ]
+    allowed_status = ["Pending", "Matched", "Completed"]
 
     if status not in allowed_status:
-        return {
-            "message": "Invalid status"
-        }
+        return {"message": "Invalid status"}
 
     emergency_request.status = status
-
     db.commit()
     db.refresh(emergency_request)
 
@@ -349,45 +428,21 @@ def update_emergency_status(
 
 
 # =========================
-# DASHBOARD
+# DASHBOARD API
 # =========================
 
-@app.get("/dashboard")
-def dashboard(
+@app.get("/api/dashboard")
+def dashboard_api(
     db: Session = Depends(get_db)
 ):
-
-    total_donors = db.query(
-        models.Donor
-    ).count()
-
-    available_donors = db.query(
-        models.Donor
-    ).filter(
-        models.Donor.available == True
-    ).count()
-
-    total_requests = db.query(
-        models.EmergencyRequest
-    ).count()
-
-    pending_requests = db.query(
-        models.EmergencyRequest
-    ).filter(
-        models.EmergencyRequest.status == "Pending"
-    ).count()
-
-    matched_requests = db.query(
-        models.EmergencyRequest
-    ).filter(
-        models.EmergencyRequest.status == "Matched"
-    ).count()
-
-    completed_requests = db.query(
-        models.EmergencyRequest
-    ).filter(
-        models.EmergencyRequest.status == "Completed"
-    ).count()
+    total_donors = db.query(models.Donor).count()
+    available_donors = db.query(models.Donor).filter(models.Donor.available == True).count()
+    total_requests = db.query(models.EmergencyRequest).count()
+    pending_requests = db.query(models.EmergencyRequest).filter(models.EmergencyRequest.status == "Pending").count()
+    matched_requests = db.query(models.EmergencyRequest).filter(models.EmergencyRequest.status == "Matched").count()
+    completed_requests = db.query(models.EmergencyRequest).filter(models.EmergencyRequest.status == "Completed").count()
+    critical_requests = db.query(models.EmergencyRequest).filter(models.EmergencyRequest.priority == "Critical", models.EmergencyRequest.status != "Completed").count()
+    high_requests = db.query(models.EmergencyRequest).filter(models.EmergencyRequest.priority == "High", models.EmergencyRequest.status != "Completed").count()
 
     return {
         "total_donors": total_donors,
@@ -395,5 +450,7 @@ def dashboard(
         "total_requests": total_requests,
         "pending_requests": pending_requests,
         "matched_requests": matched_requests,
-        "completed_requests": completed_requests
+        "completed_requests": completed_requests,
+        "critical_requests": critical_requests,
+        "high_requests": high_requests
     }

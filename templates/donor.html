@@ -1,461 +1,670 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Blood Donor</title>
-
+    <title>Register Blood Donor</title>
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            margin: 0;
-            background: #f5f5f5;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            color: #1a1a2e;
         }
 
-        header {
-            background: #b71c1c;
-            color: white;
-            padding: 20px;
-            text-align: center;
+        .top-bar {
+            background: linear-gradient(135deg, #b71c1c 0%, #c62828 50%, #d32f2f 100%);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 56px;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            box-shadow: 0 2px 12px rgba(183,28,28,0.25);
+        }
+        .top-bar-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .top-bar-icon { width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .top-bar-title { color: white; font-size: 1rem; font-weight: 700; }
+        .lang-toggle { display: flex; background: rgba(255,255,255,0.15); border-radius: 20px; padding: 2px; }
+        .lang-btn { padding: 5px 14px; border: none; border-radius: 18px; font-size: 0.72rem; font-weight: 700; cursor: pointer; background: transparent; color: rgba(255,255,255,0.65); transition: all 0.2s; }
+        .lang-btn.active { background: white; color: #b71c1c; }
+
+        .container { max-width: 640px; margin: 0 auto; padding: 16px 16px 90px; }
+
+        .page-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 4px;
+        }
+        .page-subtitle {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 20px;
         }
 
-        .container {
-            width: 500px;
-            max-width: 92%;
-            margin: 40px auto;
-        }
-
-        .box {
+        .card {
             background: white;
-            padding: 30px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 18px;
+            padding: 24px 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 8px rgba(0,0,0,0.05);
         }
 
-        h2 {
-            text-align: center;
-            color: #b71c1c;
-            margin-bottom: 25px;
-        }
-
-        label {
+        .form-group { margin-bottom: 16px; }
+        .form-label {
             display: block;
-            font-weight: bold;
-            margin-top: 15px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 6px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            font-size: 1rem;
+            background: #fafafa;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            color: #1a1a2e;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #b71c1c;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(183,28,28,0.08);
+        }
+        .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            font-size: 1rem;
+            background: #fafafa;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            color: #1a1a2e;
+        }
+        .form-select:focus {
+            outline: none;
+            border-color: #b71c1c;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(183,28,28,0.08);
         }
 
-        input,
-        select {
+        .gps-btn {
             width: 100%;
-            padding: 12px;
-            margin-top: 7px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        button {
-            width: 100%;
-            padding: 13px;
-            margin-top: 20px;
-            background: #b71c1c;
+            padding: 14px;
+            margin-top: 8px;
+            background: linear-gradient(135deg, #43a047, #2e7d32);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            font-weight: 700;
             cursor: pointer;
-            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 48px;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .gps-btn:hover { box-shadow: 0 4px 16px rgba(46,125,50,0.3); }
+        .gps-btn:active { transform: scale(0.98); }
+        .gps-btn:disabled { background: #bbb; box-shadow: none; cursor: not-allowed; }
+        .gps-coords {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: #2e7d32;
+            font-weight: 600;
+            min-height: 20px;
+        }
+        .gps-coords.error { color: #c62828; }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #b71c1c, #d32f2f);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            min-height: 52px;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .submit-btn:hover { box-shadow: 0 4px 16px rgba(183,28,28,0.3); }
+        .submit-btn:active { transform: scale(0.98); }
+        .submit-btn:disabled { background: #bbb; box-shadow: none; cursor: not-allowed; }
+
+        .message {
+            text-align: center;
+            margin-top: 14px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            min-height: 24px;
+        }
+        .message.success { color: #2e7d32; }
+        .message.error { color: #c62828; }
+
+        .section-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
         }
 
-        button:hover {
-            background: #8e0000;
-        }
-
+        .donor-list { display: flex; flex-direction: column; gap: 10px; }
         .donor-card {
-            background: #f9f9f9;
-            border-left: 5px solid #b71c1c;
-            padding: 15px;
-            margin-top: 15px;
-            border-radius: 5px;
+            background: #fafafa;
+            border-radius: 14px;
+            padding: 16px;
+            border-left: 4px solid #b71c1c;
+            transition: transform 0.15s;
         }
-
-        .available {
-            color: green;
-            font-weight: bold;
+        .donor-card:active { transform: scale(0.99); }
+        .donor-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+        .donor-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ffebee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
         }
-
-        .unavailable {
-            color: #b71c1c;
-            font-weight: bold;
+        .donor-info { flex: 1; min-width: 0; }
+        .donor-name { font-size: 0.92rem; font-weight: 700; color: #1a1a2e; }
+        .donor-blood { font-size: 0.78rem; color: #b71c1c; font-weight: 600; }
+        .donor-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+        .donor-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-size: 0.72rem;
+            color: #666;
+            font-weight: 500;
         }
-
-        .status-button {
-            margin-top: 10px;
-            background: #555;
+        .donor-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.72rem;
+            font-weight: 600;
         }
-
-        #message {
+        .donor-status.available { background: #e8f5e9; color: #2e7d32; }
+        .donor-status.unavailable { background: #f5f5f5; color: #999; }
+        .donor-actions { display: flex; gap: 8px; margin-top: 8px; }
+        .btn-toggle {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
             text-align: center;
-            margin-top: 15px;
-            font-weight: bold;
+            transition: all 0.2s;
+            min-height: 42px;
         }
+        .btn-toggle:hover { border-color: #b71c1c; color: #b71c1c; }
+        .btn-call {
+            padding: 10px 18px;
+            background: linear-gradient(135deg, #43a047, #2e7d32);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            min-height: 42px;
+            transition: transform 0.15s;
+        }
+        .btn-call:active { transform: scale(0.97); }
 
-        .back {
-            display: block;
+        .empty-state {
             text-align: center;
-            margin: 25px;
+            padding: 30px 20px;
+            color: #999;
+        }
+        .empty-state-icon { font-size: 2.5rem; margin-bottom: 10px; }
+        .empty-state-text { font-size: 0.92rem; font-weight: 600; }
+
+        .loading { text-align: center; padding: 20px; color: #999; font-weight: 500; }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin: 16px auto;
             color: #b71c1c;
             text-decoration: none;
+            font-weight: 600;
+            font-size: 0.88rem;
+            padding: 10px;
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+        .back-link:hover { background: #ffebee; }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 16px rgba(0,0,0,0.08);
+            display: flex;
+            z-index: 200;
+            padding-bottom: env(safe-area-inset-bottom);
+            border-top: 1px solid #f0f0f0;
+        }
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 0 6px;
+            text-decoration: none;
+            color: #999;
+            font-size: 0.65rem;
+            font-weight: 600;
+            gap: 3px;
+            transition: color 0.2s;
+            position: relative;
+        }
+        .nav-item.active { color: #b71c1c; }
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 24px;
+            height: 3px;
+            background: #b71c1c;
+            border-radius: 0 0 3px 3px;
+        }
+        .nav-icon { font-size: 1.25rem; line-height: 1; }
+
+        @media (max-width: 480px) {
+            .container { padding: 12px 12px 90px; }
+            .card { padding: 20px 16px; }
+        }
+        @media (min-width: 768px) {
+            .container { max-width: 560px; padding: 24px 24px 90px; }
         }
     </style>
 </head>
-
-
 <body>
 
-<header>
-    <h1>🩸 Blood Donation Network</h1>
+<header class="top-bar">
+    <a href="/" class="top-bar-brand">
+        <div class="top-bar-icon">&#129656;</div>
+        <span class="top-bar-title">Blood Donation Network</span>
+    </a>
+    <div class="lang-toggle">
+        <button id="langEn" class="lang-btn active" onclick="setLang('en')">EN</button>
+        <button id="langTa" class="lang-btn" onclick="setLang('ta')">&#3000;&#3021;&#2965;</button>
+    </div>
 </header>
-
 
 <div class="container">
 
-    <!-- REGISTER DONOR -->
-
-    <div class="box">
-
-        <h2>Register as Donor</h2>
+    <div class="card">
+        <div class="page-title" id="pageTitle">Register as Donor</div>
+        <div class="page-subtitle" id="pageSub">Help save lives by registering as a blood donor</div>
 
         <form id="donorForm">
+            <div class="form-group">
+                <label class="form-label" id="lblName">Name</label>
+                <input type="text" class="form-input" id="name" placeholder="Enter your full name" required>
+            </div>
 
-            <label>Name</label>
+            <div class="form-group">
+                <label class="form-label" id="lblBlood">Blood Group</label>
+                <select class="form-select" id="blood_group" required>
+                    <option value="" id="selBlood">Select Blood Group</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                </select>
+            </div>
 
-            <input
-                type="text"
-                id="name"
-                placeholder="Enter your name"
-                required
-            >
+            <div class="form-group">
+                <label class="form-label" id="lblLocation">Location</label>
+                <input type="text" class="form-input" id="location" placeholder="Enter your city or area" required>
+                <button type="button" class="gps-btn" id="gpsBtn" onclick="useMyLocation()">&#128205; <span id="gpsBtnText">Use My Current Location</span></button>
+                <div class="gps-coords" id="gpsCoords"></div>
+            </div>
 
+            <div class="form-group">
+                <label class="form-label" id="lblPhone">Phone Number</label>
+                <input type="tel" class="form-input" id="phone" placeholder="Enter 10-digit phone number" required>
+            </div>
 
-            <label>Blood Group</label>
-
-            <select id="blood_group" required>
-
-                <option value="">
-                    Select Blood Group
-                </option>
-
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-
-            </select>
-
-
-            <label>Location</label>
-
-            <input
-                type="text"
-                id="location"
-                placeholder="Enter location"
-                required
-            >
-
-
-            <label>Phone Number</label>
-
-            <input
-                type="text"
-                id="phone"
-                placeholder="Enter phone number"
-                required
-            >
-
-
-            <button type="submit">
-                Register Donor
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span id="submitText">Register as Donor</span>
             </button>
-
         </form>
 
-        <p id="message"></p>
-
+        <div class="message" id="message"></div>
     </div>
 
-
-    <!-- DONOR LIST -->
-
-    <div class="box">
-
-        <h2>Registered Donors</h2>
-
-        <div id="donorList">
-            Loading donors...
+    <div class="card">
+        <div class="section-label" id="donorListTitle">Registered Donors</div>
+        <div id="donorList" class="donor-list">
+            <div class="loading">Loading donors...</div>
         </div>
-
     </div>
 
 </div>
 
+<a href="/" class="back-link" id="backLink">&#8592; Back to Home</a>
 
-<a href="/" class="back">
-    ← Back to Home
-</a>
-
+<nav class="bottom-nav">
+    <a href="/" class="nav-item">
+        <span class="nav-icon">&#127968;</span>
+        <span id="bnHome">Home</span>
+    </a>
+    <a href="/emergency" class="nav-item">
+        <span class="nav-icon">&#129656;</span>
+        <span id="bnEmg">Emergency</span>
+    </a>
+    <a href="/donor" class="nav-item active">
+        <span class="nav-icon">&#128100;</span>
+        <span id="bnDonor">Donor</span>
+    </a>
+    <a href="/matching" class="nav-item">
+        <span class="nav-icon">&#128269;</span>
+        <span id="bnFind">Find</span>
+    </a>
+    <a href="/dashboard" class="nav-item">
+        <span class="nav-icon">&#128200;</span>
+        <span id="bnDash">Stats</span>
+    </a>
+</nav>
 
 <script>
-
-
-// =========================
-// REGISTER DONOR
-// =========================
-
-document.getElementById("donorForm").addEventListener(
-    "submit",
-    async function(event) {
-
-        event.preventDefault();
-
-        const donorData = {
-
-            name:
-                document.getElementById("name").value,
-
-            blood_group:
-                document.getElementById("blood_group").value,
-
-            location:
-                document.getElementById("location").value,
-
-            phone:
-                document.getElementById("phone").value,
-
-            available: true
-        };
-
-
-        try {
-
-            const response = await fetch(
-                "/donors",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body:
-                        JSON.stringify(donorData)
-                }
-            );
-
-
-            const result =
-                await response.json();
-
-
-            document.getElementById(
-                "message"
-            ).innerText =
-                result.message;
-
-
-            document.getElementById(
-                "donorForm"
-            ).reset();
-
-
-            loadDonors();
-
-        } catch (error) {
-
-            document.getElementById(
-                "message"
-            ).innerText =
-                "Unable to register donor.";
-
-        }
-
+var curLang = 'en';
+var T = {
+    en: {
+        pageTitle: 'Register as Donor',
+        pageSub: 'Help save lives by registering as a blood donor',
+        lblName: 'Name',
+        lblBlood: 'Blood Group',
+        selBlood: 'Select Blood Group',
+        lblLocation: 'Location',
+        gpsBtnText: 'Use My Current Location',
+        gpsGetting: '\u23F3 Getting location...',
+        lblPhone: 'Phone Number',
+        submitText: 'Register as Donor',
+        submitting: 'Registering...',
+        successMsg: 'Donor registered successfully!',
+        failMsg: 'Unable to register donor.',
+        donorListTitle: 'Registered Donors',
+        noDonors: 'No donors registered yet.',
+        unableLoad: 'Unable to load donors.',
+        available: 'Available',
+        unavailable: 'Unavailable',
+        markAvail: 'Mark Available',
+        markUnavail: 'Mark Unavailable',
+        updatedMsg: 'Availability updated!',
+        unableUpdate: 'Unable to update availability.',
+        backLink: '\u2190 Back to Home',
+        bnHome: 'Home',
+        bnEmg: 'Emergency',
+        bnDonor: 'Donor',
+        bnFind: 'Find',
+        bnDash: 'Stats',
+        gpsPermDenied: 'Location permission denied. Enter manually.',
+        gpsUnavailable: 'Location unavailable. Enter manually.',
+        gpsTimeout: 'Location request timed out.',
+        gpsDefault: 'Unable to get location. Enter manually.',
+        gpsDetected: 'Detected: '
+    },
+    ta: {
+        pageTitle: '\u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF \u0BAE\u0BB1\u0BBF\u0B9F\u0BAA\u0BCd\u0BAA\u0BBF\u0BB1\u0BC1\u0B99\u0BCd\u0B95',
+        pageSub: '\u0B87\u0BB0\u0BA4\u0BCd\u0BA4\u0B95\u0BBE\u0BB0\u0BB0\u0BBE \u0BB0\u0BA4\u0BCd\u0BA4\u0BAE\u0BCD \u0BAA\u0BBF\u0BB1\u0BC1\u0BA8\u0BCd\u0BA4\u0BAE\u0BCD \u0BAA\u0BC6\u0BB2\u0BCD',
+        lblName: '\u0BAA\u0BC6\u0BB0\u0BCD',
+        lblBlood: '\u0B87\u0BB0\u0BCd\u0BA4\u0BCd\u0B9F \u0B95\u0BB0\u0BCD\u0BA4\u0BCD\u0B9F\u0BCD',
+        selBlood: '\u0B87\u0BB0\u0BCd\u0BA4\u0BCd\u0B9F \u0B95\u0BB0\u0BCD\u0BA4\u0BCD\u0B9F \u0BA4\u0BC7\u0BB0\u0BC1\u0B99\u0BCd\u0B95',
+        lblLocation: '\u0B87\u0B9F\u0BCd\u0BAA\u0BBF\u0BA4\u0BCd\u0BA4\u0BAE\u0BCD',
+        gpsBtnText: '\u0B8E\u0BB2\u0BBE\u0BCD \u0BA4\u0BB1\u0BCd\u0B95\u0BBE\u0BB2\u0BCD \u0B87\u0B9F\u0BCd\u0BAA\u0BBF\u0BA4\u0BCd\u0BA4\u0BAE\u0BCD',
+        gpsGetting: '\u23F3 \u0B87\u0B9F\u0BCd\u0BAA\u0BBF\u0BA4\u0BCd\u0BA4\u0BAE\u0BCD \u0BAA\u0BC6\u0BB0\u0BC1\u0B95\u0BCd\u0B95\u0BBF\u0BB1\u0BA4\u0BC1...',
+        lblPhone: '\u0BA4\u0BCA\u0BB2\u0BC8 \u0BA8\u0B99\u0BCd\u0B95\u0BBF\u0BB3\u0BCD',
+        submitText: '\u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF \u0BAE\u0BB1\u0BBF\u0B9F\u0BAA\u0BCd\u0BAA\u0BBF\u0BB1\u0BC1\u0B99\u0BCd\u0B95',
+        submitting: '\u0BAA\u0BC6\u0BB2\u0BCd\u0BB2\u0BAE\u0BBF\u0B95\u0BBF\u0BB1\u0BA4\u0BC1...',
+        successMsg: '\u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF \u0BAA\u0BC6\u0BB2\u0BCd\u0BB2\u0BAE\u0BBF\u0B95\u0BAE\u0BCD!',
+        failMsg: '\u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF \u0BAA\u0BC6\u0BB2\u0BCd\u0BB2\u0BAE\u0BBF\u0B95\u0BAE\u0BCD \u0B83\u0BA4\u0BCA\u0BAA\u0BB5\u0BBF\u0BB2\u0BCD.',
+        donorListTitle: '\u0BAA\u0BC6\u0BB2\u0BCd\u0BB2\u0BAA\u0BCD\u0BAA\u0B9F\u0BCd\u0BBF \u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF\u0B95\u0BB3\u0BCD',
+        noDonors: '\u0B87\u0B92\u0BB1\u0BCD\u0BA4\u0BC1\u0BAE\u0BCD \u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF\u0B95\u0BB3\u0BCD \u0BAA\u0BC6\u0BB2\u0BCd\u0BB2\u0BAA\u0BCd\u0BAA\u0B9F\u0BCd\u0BBF\u0BAA\u0BBF\u0BBF\u0BB2\u0BCD.',
+        unableLoad: '\u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF\u0B95\u0BB3\u0BCD \u0B8F\u0BB1\u0BCD\u0B9A\u0BC1\u0BAE\u0BB8\u0BCd\u0B9F\u0BBF\u0BAF\u0B9F\u0BC1 \u0BAE\u0BC1\u0B9F\u0BCB\u0BAA\u0BAA\u0B9F\u0BCd\u0BB5\u0BB3\u0BB2\u0BCD.',
+        available: '\u0B95\u0BBF\u0B9F\u0BCD\u0BAA\u0BBF\u0B9F\u0BCD \u0B87\u0BB0\u0BC1\u0B99\u0BCd\u0B95\u0BBF\u0BB3\u0BCD',
+        unavailable: '\u0B95\u0BBF\u0B9F\u0BCd\u0BAA\u0BBF\u0B9F\u0BCD \u0B87\u0BB2\u0BCd\u0BB2\u0BC8',
+        markAvail: '\u0B95\u0BBF\u0B9F\u0BCd\u0BAA\u0BBF\u0B9F\u0BCD \u0B87\u0BB0\u0BC1\u0B99\u0BCd\u0B95\u0BBF\u0BB3\u0BCD',
+        markUnavail: '\u0B95\u0BBF\u0B9F\u0BCd\u0BAA\u0BBF\u0B9F\u0BCD \u0B87\u0BB2\u0BCd\u0BB2\u0BC8',
+        updatedMsg: '\u0B95\u0BBF\u0B9F\u0BCd\u0BAA\u0BBF\u0B9F\u0BCD \u0BAA\u0BC1\u0BA4\u0BCD\u0BAF\u0BBF\u0BAF\u0BBE\u0B95\u0BCd\u0B95 \u0BAA\u0BC1\u0BB4\u0BB1\u0BBF\u0BAF\u0BCD!',
+        unableUpdate: '\u0B95\u0BBF\u0B9F\u0BCd\u0BAA\u0BBF\u0B9F\u0BCD \u0BAA\u0BC1\u0BA4\u0BCd\u0BAF\u0BBF\u0BAF\u0BBE\u0B95\u0BCd\u0B95 \u0BAE\u0BC1\u0B9F\u0BCB\u0BAA\u0BAA\u0B9F\u0BCd\u0BB5\u0BB3\u0BB2\u0BCD.',
+        backLink: '\u2190 \u0B8E\u0BB5\u0BB8\u0BBF\u0B95\u0BCD \u0BA4\u0BBF\u0BB0\u0BC1\u0B99\u0BCd\u0B95',
+        bnHome: '\u0B8E\u0BB5\u0BB8\u0BBF',
+        bnEmg: '\u0B85\u0BB5\u0B9A\u0BB0',
+        bnDonor: '\u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF',
+        bnFind: '\u0BA4\u0BC7\u0B9F\u0BC1',
+        bnDash: '\u0BAA\u0BBF\u0BB1\u0BC1\u0BAE\u0BBE\u0BB0\u0B99\u0BCd\u0B95\u0BB3\u0BCD',
+        gpsPermDenied: '\u0B87\u0B9F\u0BCd\u0BAA\u0BBF\u0BA4\u0BCd\u0BA4 \u0B85\u0BA9\u0BC1\u0BAE\u0BA4\u0BBF \u0BAE\u0BB1\u0BC1\u0B95\u0BCd\u0B95\u0BAA\u0BAA\u0B9F\u0BCd\u0BB5\u0BB3\u0BCD.',
+        gpsUnavailable: '\u0B87\u0B9F\u0BCd\u0BAA\u0BBF\u0BA4\u0BCd\u0BA4\u0BAE\u0BCD \u0B87\u0BB2\u0BCd\u0BB2\u0BC8.',
+        gpsTimeout: '\u0B87\u0B9F\u0BCd\u0BAA\u0BBF\u0BA4\u0BCd\u0BA4 \u0B95\u0BCA\u0BB3\u0BCd\u0BB8\u0BB2\u0BBE\u0BA4\u0BC1 \u0BA8\u0BC7\u0BB0\u0BAE\u0BCD \u0BAE\u0BC1\u0B9F\u0BCB\u0BB1\u0BCd\u0BB1\u0B9F\u0BC1.',
+        gpsDefault: '\u0B87\u0B9F\u0BCd\u0BAA\u0BBF\u0BA4\u0BCd\u0BA4\u0BAE\u0BCD \u0BAA\u0BC6\u0BB0\u0BC1\u0B95\u0BCd\u0B95 \u0B9A\u0BC7\u0B95\u0BBE\u0BB0\u0B9F\u0BCd \u0B87\u0BB2\u0BCd\u0BB2\u0BC8.',
+        gpsDetected: '\u0B95\u0BA3\u0BCd\u0B9F\u0BBF\u0B9F\u0BC1 \u0B9A\u0BC7\u0BAF\u0BAE\u0BCD: '
     }
-);
+};
 
+function setLang(lang) {
+    curLang = lang;
+    document.getElementById('langEn').classList.toggle('active', lang === 'en');
+    document.getElementById('langTa').classList.toggle('active', lang === 'ta');
+    applyLang();
+}
 
-// =========================
-// LOAD DONORS
-// =========================
+function applyLang() {
+    var t = T[curLang];
+    document.getElementById('pageTitle').textContent = t.pageTitle;
+    document.getElementById('pageSub').textContent = t.pageSub;
+    document.getElementById('lblName').textContent = t.lblName;
+    document.getElementById('lblBlood').textContent = t.lblBlood;
+    document.getElementById('selBlood').textContent = t.selBlood;
+    document.getElementById('lblLocation').textContent = t.lblLocation;
+    document.getElementById('lblPhone').textContent = t.lblPhone;
+    document.getElementById('submitText').textContent = t.submitText;
+    document.getElementById('donorListTitle').textContent = t.donorListTitle;
+    document.getElementById('backLink').textContent = t.backLink;
+    document.getElementById('bnHome').textContent = t.bnHome;
+    document.getElementById('bnEmg').textContent = t.bnEmg;
+    document.getElementById('bnDonor').textContent = t.bnDonor;
+    document.getElementById('bnFind').textContent = t.bnFind;
+    document.getElementById('bnDash').textContent = t.bnDash;
+    var gpsBtn = document.getElementById('gpsBtn');
+    if (gpsBtn && !gpsBtn.disabled) {
+        document.getElementById('gpsBtnText').textContent = t.gpsBtnText;
+    }
+}
+
+document.getElementById('donorForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var t = T[curLang];
+    var submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    document.getElementById('submitText').textContent = t.submitting;
+
+    var data = {
+        name: document.getElementById('name').value,
+        blood_group: document.getElementById('blood_group').value,
+        location: document.getElementById('location').value,
+        phone: document.getElementById('phone').value,
+        available: true
+    };
+
+    try {
+        var resp = await fetch('/donors', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        var result = await resp.json();
+        var msg = document.getElementById('message');
+        if (resp.ok) {
+            msg.className = 'message success';
+            msg.textContent = t.successMsg;
+            document.getElementById('donorForm').reset();
+            loadDonors();
+        } else {
+            msg.className = 'message error';
+            msg.textContent = result.detail || t.failMsg;
+        }
+    } catch(err) {
+        document.getElementById('message').className = 'message error';
+        document.getElementById('message').textContent = t.failMsg;
+    }
+    submitBtn.disabled = false;
+    document.getElementById('submitText').textContent = t.submitText;
+});
 
 async function loadDonors() {
-
+    var t = T[curLang];
+    var container = document.getElementById('donorList');
     try {
-
-        const response =
-            await fetch("/donors");
-
-        const donors =
-            await response.json();
-
-
-        const donorList =
-            document.getElementById(
-                "donorList"
-            );
-
-
-        donorList.innerHTML = "";
-
-
+        var resp = await fetch('/donors');
+        var donors = await resp.json();
+        container.innerHTML = '';
         if (donors.length === 0) {
-
-            donorList.innerHTML =
-                "<p>No donors registered yet.</p>";
-
+            container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128100;</div><div class="empty-state-text">' + t.noDonors + '</div></div>';
             return;
         }
-
-
         donors.forEach(function(donor) {
-
-            const card =
-                document.createElement("div");
-
-
-            card.className =
-                "donor-card";
-
-
-            const statusText =
-                donor.available
-                    ? "Available"
-                    : "Unavailable";
-
-
-            const statusClass =
-                donor.available
-                    ? "available"
-                    : "unavailable";
-
-
-            const buttonText =
-                donor.available
-                    ? "Mark Unavailable"
-                    : "Mark Available";
-
-
-            card.innerHTML = `
-
-                <p>
-                    <strong>Name:</strong>
-                    ${donor.name}
-                </p>
-
-                <p>
-                    <strong>Blood Group:</strong>
-                    ${donor.blood_group}
-                </p>
-
-                <p>
-                    <strong>Location:</strong>
-                    ${donor.location}
-                </p>
-
-                <p>
-                    <strong>Phone:</strong>
-                    ${donor.phone}
-                </p>
-
-                <p class="${statusClass}">
-                    Status: ${statusText}
-                </p>
-
-                <button
-                    class="status-button"
-                    onclick="changeAvailability(
-                        ${donor.id},
-                        ${!donor.available}
-                    )"
-                >
-                    ${buttonText}
-                </button>
-
-            `;
-
-
-            donorList.appendChild(card);
-
+            var card = document.createElement('div');
+            card.className = 'donor-card';
+            var availClass = donor.available ? 'available' : 'unavailable';
+            var availText = donor.available ? t.available : t.unavailable;
+            var toggleText = donor.available ? t.markUnavail : t.markAvail;
+            var phoneDigits = (donor.phone || '').replace(/[^0-9]/g, '');
+            var callLink = phoneDigits.length >= 10 ? '<a href="tel:' + phoneDigits + '" class="btn-call">&#128222; Call</a>' : '';
+            card.innerHTML =
+                '<div class="donor-row">' +
+                    '<div class="donor-avatar">&#128100;</div>' +
+                    '<div class="donor-info">' +
+                        '<div class="donor-name">' + donor.name + '</div>' +
+                        '<div class="donor-blood">' + donor.blood_group + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="donor-meta">' +
+                    '<span class="donor-tag">&#128205; ' + donor.location + '</span>' +
+                    '<span class="donor-tag">&#128222; ' + donor.phone + '</span>' +
+                    '<span class="donor-status ' + availClass + '">' + availText + '</span>' +
+                '</div>' +
+                '<div class="donor-actions">' +
+                    '<button class="btn-toggle" onclick="toggleAvail(' + donor.id + ',' + !donor.available + ')">' + toggleText + '</button>' +
+                    callLink +
+                '</div>';
+            container.appendChild(card);
         });
-
-    } catch (error) {
-
-        document.getElementById(
-            "donorList"
-        ).innerHTML =
-            "<p>Unable to load donors.</p>";
-
+    } catch(err) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-text">' + t.unableLoad + '</div></div>';
     }
-
 }
 
-
-// =========================
-// CHANGE AVAILABILITY
-// =========================
-
-async function changeAvailability(
-    donorId,
-    newStatus
-) {
-
+async function toggleAvail(donorId, newStatus) {
+    var t = T[curLang];
     try {
-
-        const response =
-            await fetch(
-                `/donors/${donorId}/availability?available=${newStatus}`,
-                {
-                    method: "PUT"
-                }
-            );
-
-
-        const result =
-            await response.json();
-
-
-        alert(result.message);
-
-
+        var resp = await fetch('/donors/' + donorId + '/availability?available=' + newStatus, { method: 'PUT' });
+        var result = await resp.json();
         loadDonors();
-
-    } catch (error) {
-
-        alert(
-            "Unable to update donor availability."
-        );
-
+    } catch(err) {
+        alert(t.unableUpdate);
     }
-
 }
 
+function useMyLocation() {
+    var gpsBtn = document.getElementById('gpsBtn');
+    var gpsCoords = document.getElementById('gpsCoords');
+    var locationInput = document.getElementById('location');
+    var t = T[curLang];
 
-// Load donors when page opens
+    if (!navigator.geolocation) {
+        gpsCoords.textContent = t.gpsDefault;
+        gpsCoords.className = 'gps-coords error';
+        return;
+    }
 
+    gpsBtn.disabled = true;
+    document.getElementById('gpsBtnText').textContent = t.gpsGetting;
+    gpsCoords.textContent = '';
+    gpsCoords.className = 'gps-coords';
+
+    navigator.geolocation.getCurrentPosition(
+        function(pos) {
+            var lat = pos.coords.latitude;
+            var lng = pos.coords.longitude;
+            var display = lat.toFixed(6) + ', ' + lng.toFixed(6);
+            locationInput.value = display;
+            gpsCoords.textContent = t.gpsDetected + display;
+            gpsCoords.className = 'gps-coords';
+            gpsBtn.disabled = false;
+            document.getElementById('gpsBtnText').textContent = t.gpsBtnText;
+        },
+        function(err) {
+            var msg = '';
+            switch(err.code) {
+                case 1: msg = t.gpsPermDenied; break;
+                case 2: msg = t.gpsUnavailable; break;
+                case 3: msg = t.gpsTimeout; break;
+                default: msg = t.gpsDefault;
+            }
+            gpsCoords.textContent = msg;
+            gpsCoords.className = 'gps-coords error';
+            gpsBtn.disabled = false;
+            document.getElementById('gpsBtnText').textContent = t.gpsBtnText;
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+}
+
+applyLang();
 loadDonors();
-
 </script>
-
-
 </body>
-
 </html>
