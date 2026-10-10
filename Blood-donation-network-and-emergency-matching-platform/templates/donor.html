@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Blood Donor</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #f5f5f5;
+        }
+
+        header {
+            background: #b71c1c;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            width: 500px;
+            max-width: 92%;
+            margin: 40px auto;
+        }
+
+        .box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #b71c1c;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 7px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 20px;
+            background: #b71c1c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #8e0000;
+        }
+
+        .donor-card {
+            background: #f9f9f9;
+            border-left: 5px solid #b71c1c;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+        }
+
+        .available {
+            color: green;
+            font-weight: bold;
+        }
+
+        .unavailable {
+            color: #b71c1c;
+            font-weight: bold;
+        }
+
+        .status-button {
+            margin-top: 10px;
+            background: #555;
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .back {
+            display: block;
+            text-align: center;
+            margin: 25px;
+            color: #b71c1c;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+
+<body>
+
+<header>
+    <h1>🩸 Blood Donation Network</h1>
+</header>
+
+
+<div class="container">
+
+    <!-- REGISTER DONOR -->
+
+    <div class="box">
+
+        <h2>Register as Donor</h2>
+
+        <form id="donorForm">
+
+            <label>Name</label>
+
+            <input
+                type="text"
+                id="name"
+                placeholder="Enter your name"
+                required
+            >
+
+
+            <label>Blood Group</label>
+
+            <select id="blood_group" required>
+
+                <option value="">
+                    Select Blood Group
+                </option>
+
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+
+            </select>
+
+
+            <label>Location</label>
+
+            <input
+                type="text"
+                id="location"
+                placeholder="Enter location"
+                required
+            >
+
+
+            <label>Phone Number</label>
+
+            <input
+                type="text"
+                id="phone"
+                placeholder="Enter phone number"
+                required
+            >
+
+
+            <button type="submit">
+                Register Donor
+            </button>
+
+        </form>
+
+        <p id="message"></p>
+
+    </div>
+
+
+    <!-- DONOR LIST -->
+
+    <div class="box">
+
+        <h2>Registered Donors</h2>
+
+        <div id="donorList">
+            Loading donors...
+        </div>
+
+    </div>
+
+</div>
+
+
+<a href="/" class="back">
+    ← Back to Home
+</a>
+
+
+<script>
+
+
+// =========================
+// REGISTER DONOR
+// =========================
+
+document.getElementById("donorForm").addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+        const donorData = {
+
+            name:
+                document.getElementById("name").value,
+
+            blood_group:
+                document.getElementById("blood_group").value,
+
+            location:
+                document.getElementById("location").value,
+
+            phone:
+                document.getElementById("phone").value,
+
+            available: true
+        };
+
+
+        try {
+
+            const response = await fetch(
+                "/donors",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(donorData)
+                }
+            );
+
+
+            const result =
+                await response.json();
+
+
+            document.getElementById(
+                "message"
+            ).innerText =
+                result.message;
+
+
+            document.getElementById(
+                "donorForm"
+            ).reset();
+
+
+            loadDonors();
+
+        } catch (error) {
+
+            document.getElementById(
+                "message"
+            ).innerText =
+                "Unable to register donor.";
+
+        }
+
+    }
+);
+
+
+// =========================
+// LOAD DONORS
+// =========================
+
+async function loadDonors() {
+
+    try {
+
+        const response =
+            await fetch("/donors");
+
+        const donors =
+            await response.json();
+
+
+        const donorList =
+            document.getElementById(
+                "donorList"
+            );
+
+
+        donorList.innerHTML = "";
+
+
+        if (donors.length === 0) {
+
+            donorList.innerHTML =
+                "<p>No donors registered yet.</p>";
+
+            return;
+        }
+
+
+        donors.forEach(function(donor) {
+
+            const card =
+                document.createElement("div");
+
+
+            card.className =
+                "donor-card";
+
+
+            const statusText =
+                donor.available
+                    ? "Available"
+                    : "Unavailable";
+
+
+            const statusClass =
+                donor.available
+                    ? "available"
+                    : "unavailable";
+
+
+            const buttonText =
+                donor.available
+                    ? "Mark Unavailable"
+                    : "Mark Available";
+
+
+            card.innerHTML = `
+
+                <p>
+                    <strong>Name:</strong>
+                    ${donor.name}
+                </p>
+
+                <p>
+                    <strong>Blood Group:</strong>
+                    ${donor.blood_group}
+                </p>
+
+                <p>
+                    <strong>Location:</strong>
+                    ${donor.location}
+                </p>
+
+                <p>
+                    <strong>Phone:</strong>
+                    ${donor.phone}
+                </p>
+
+                <p class="${statusClass}">
+                    Status: ${statusText}
+                </p>
+
+                <button
+                    class="status-button"
+                    onclick="changeAvailability(
+                        ${donor.id},
+                        ${!donor.available}
+                    )"
+                >
+                    ${buttonText}
+                </button>
+
+            `;
+
+
+            donorList.appendChild(card);
+
+        });
+
+    } catch (error) {
+
+        document.getElementById(
+            "donorList"
+        ).innerHTML =
+            "<p>Unable to load donors.</p>";
+
+    }
+
+}
+
+
+// =========================
+// CHANGE AVAILABILITY
+// =========================
+
+async function changeAvailability(
+    donorId,
+    newStatus
+) {
+
+    try {
+
+        const response =
+            await fetch(
+                `/donors/${donorId}/availability?available=${newStatus}`,
+                {
+                    method: "PUT"
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        alert(result.message);
+
+
+        loadDonors();
+
+    } catch (error) {
+
+        alert(
+            "Unable to update donor availability."
+        );
+
+    }
+
+}
+
+
+// Load donors when page opens
+
+loadDonors();
+
+</script>
+
+
+</body>
+
+</html>

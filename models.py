@@ -19,13 +19,13 @@ class Donor(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    name = Column(String, nullable=False)
+    name = Column(String(100), nullable=False)
 
-    blood_group = Column(String, nullable=False)
+    blood_group = Column(String(10), nullable=False)
 
-    location = Column(String, nullable=False)
+    location = Column(String(100), nullable=False)
 
-    phone = Column(String, nullable=False)
+    phone = Column(String(20), nullable=False)
 
     available = Column(Boolean, default=True)
 
@@ -43,19 +43,19 @@ class EmergencyRequest(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    patient_name = Column(String, nullable=False)
+    patient_name = Column(String(100), nullable=False)
 
-    blood_group = Column(String, nullable=False)
+    blood_group = Column(String(10), nullable=False)
 
-    location = Column(String, nullable=False)
+    location = Column(String(100), nullable=False)
 
-    hospital = Column(String, nullable=False)
+    hospital = Column(String(100), nullable=False)
 
-    contact = Column(String, nullable=False)
+    contact = Column(String(20), nullable=False)
 
-    status = Column(String, default="Pending")
+    status = Column(String(20), default="Pending")
 
-    priority = Column(String, default="Normal")
+    priority = Column(String(20), default="Normal")
 
     latitude = Column(Float, nullable=True)
 

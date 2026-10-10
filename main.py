@@ -5,9 +5,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 import math
 
-from database import engine, Base, get_db
+from database import engine, Base, get_db, run_safe_migration
 import models
 from schemas import DonorCreate, EmergencyRequestCreate
+
+# Safe idempotent migration before table creation - protects existing data
+run_safe_migration()
 
 
 try:

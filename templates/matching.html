@@ -7,7 +7,7 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Noto Sans Tamil', 'Latha', 'Segoe UI', system-ui, -apple-system, sans-serif;
             background: #f0f2f5;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
@@ -189,6 +189,71 @@
         .nav-item.active::before { content: ''; position: absolute; top: 0; width: 24px; height: 3px; background: #b71c1c; border-radius: 0 0 3px 3px; }
         .nav-icon { font-size: 1.25rem; line-height: 1; }
 
+        .nearby-card { text-align: center; }
+        .nearby-btn {
+            width: 100%;
+            padding: 14px 18px;
+            background: linear-gradient(135deg, #0d47a1, #1976d2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 48px;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 2px 8px rgba(13,71,161,0.2);
+        }
+        .nearby-btn:hover { box-shadow: 0 4px 16px rgba(13,71,161,0.3); transform: translateY(-1px); }
+        .nearby-btn:active { transform: scale(0.98); }
+        .nearby-btn:disabled { background: #bbb; box-shadow: none; cursor: not-allowed; transform: none; }
+        .nearby-status { margin-top: 10px; font-size: 0.82rem; font-weight: 600; min-height: 18px; }
+        .nearby-status.error { color: #c62828; }
+        .nearby-status.success { color: #2e7d32; }
+        .banks-results { margin-top: 12px; }
+        .bank-card {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 16px;
+            background: #fafafa;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border-left: 3px solid #0d47a1;
+        }
+        .bank-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+        .bank-name { font-size: 0.92rem; font-weight: 700; color: #1a1a2e; flex: 1; }
+        .bank-address { font-size: 0.82rem; color: #666; line-height: 1.4; }
+        .bank-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+        .bank-tag { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; background: #f0f0f0; border-radius: 6px; font-size: 0.7rem; color: #666; font-weight: 500; }
+        .bank-tag.distance { background: #e3f2fd; color: #1565c0; font-weight: 700; }
+        .bank-tag.coords { background: #e8f5e9; color: #2e7d32; }
+        .bank-open-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #0d47a1, #1976d2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.15s;
+            min-height: 40px;
+            align-self: flex-start;
+        }
+        .bank-open-btn:hover { box-shadow: 0 3px 12px rgba(13,71,161,0.3); }
+        .bank-open-btn:active { transform: scale(0.97); }
+        .banks-title { font-size: 0.82rem; font-weight: 700; color: #0d47a1; margin-bottom: 8px; }
+
         @media (max-width: 480px) {
             .request-details { grid-template-columns: 1fr; }
             .req-detail.span2 { grid-column: span 1; }
@@ -214,6 +279,12 @@
 <div class="container">
     <div class="page-title" id="pageTitle">Find Matching Donors</div>
     <div class="page-subtitle" id="pageSub">Search for compatible blood donors near you</div>
+
+    <div class="card nearby-card">
+        <button id="nearbyBtn" class="nearby-btn" onclick="findNearbyBanks()">📍 Find Nearby Blood Banks</button>
+        <div id="nearbyStatus" class="nearby-status"></div>
+        <div id="banksResults" class="banks-results"></div>
+    </div>
 
     <div id="requests">
         <div class="card"><div class="loading"><div class="spinner"></div><p style="margin-top:8px">Loading emergency requests...</p></div></div>
@@ -262,38 +333,71 @@ var T = {
         bnDonor: 'Donor',
         bnFind: 'Find',
         bnDash: 'Stats',
-        reqPrefix: 'Request #'
+        reqPrefix: 'Request #',
+        findNearbyBtn: '\uD83D\uDCCD Find Nearby Blood Banks',
+        locating: 'Getting location...',
+        nearbyOpening: 'Opening Google Maps...',
+        gpsNotSupported: 'Geolocation not supported in this browser.',
+        gpsPermDenied: 'Location permission denied. Please allow location access.',
+        gpsUnavailable: 'Location unavailable. Please try again.',
+        gpsTimeout: 'Location request timed out.',
+        gpsDefault: 'Unable to get location.',
+        banksTitle: 'Nearby Blood Banks',
+        searchingBanks: 'Searching nearby blood banks...',
+        noBanks: 'No nearby blood banks found within 10 km.',
+        noBanksSub: 'Try again later or check Google Maps.',
+        overpassError: 'Unable to fetch nearby blood banks. Please try again.',
+        bankNameDefault: 'Blood Bank',
+        addressNotAvailable: 'Address not available',
+        openInMaps: 'Open in Google Maps'
     },
     ta: {
-        pageTitle: '\u0B87\u0BB0\u0BCd\u0BA4\u0BCd\u0B9F \u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF\u0B95\u0BB3\u0BCD \u0BA4\u0BC7\u0B9F\u0BC1',
-        pageSub: '\u0B87\u0BB0\u0BCd\u0BA4\u0BCd\u0B9F \u0BAA\u0BCA\u0BB0\u0BC1\u0B9A\u0BBF\u0BA4\u0BAE\u0BCD \u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF\u0B95\u0BB3\u0BCD \u0BA4\u0BC7\u0B9F\u0BC1',
-        findBtn: '\u0B87\u0BB0\u0BCd\u0BA4\u0BCd\u0B9F \u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF\u0B95\u0BB3\u0BCD \u0BA4\u0BC7\u0B9F\u0BC1',
+        pageTitle: '\u0BAA\u0BCA\u0BB0\u0BC1\u0BA4\u0BCD\u0BA4\u0BAE\u0BBE\u0BA9 \u0B87\u0BB0\u0BA4\u0BCD\u0BA4 \u0BA4\u0BBE\u0BA9\u0BA4\u0BBE\u0BB0\u0BB0\u0BCD\u0B95\u0BB3\u0BC8\u0B95\u0BCD \u0B95\u0BA3\u0BCD\u0B9F\u0BB1\u0BBF\u0BAF\u0BC1\u0B99\u0BCD\u0B95\u0BB3\u0BCD',
+        pageSub: '\u0B89\u0B99\u0BCD\u0B95\u0BB3\u0BC1\u0B95\u0BCD\u0B95\u0BC1 \u0B85\u0BB0\u0BC1\u0B95\u0BBF\u0BB2\u0BC1\u0BB3\u0BCD\u0BB3 \u0BAA\u0BCA\u0BB0\u0BC1\u0BA4\u0BCD\u0BA4\u0BAE\u0BBE\u0BA9 \u0B87\u0BB0\u0BA4\u0BCD\u0BA4 \u0BA4\u0BBE\u0BA9\u0BA4\u0BBE\u0BB0\u0BB0\u0BCD\u0B95\u0BB3\u0BC8\u0BA4\u0BCD \u0BA4\u0BC7\u0B9F\u0BC1\u0B99\u0BCD\u0B95\u0BB3\u0BCD',
+        findBtn: '\u0BAA\u0BCA\u0BB0\u0BC1\u0BA4\u0BCD\u0BA4\u0BAE\u0BBE\u0BA9 \u0BA4\u0BBE\u0BA9\u0BA4\u0BBE\u0BB0\u0BB0\u0BCD\u0B95\u0BB3\u0BC8\u0B95\u0BCD \u0B95\u0BA3\u0BCD\u0B9F\u0BB1\u0BBF\u0BAF\u0BC1\u0B99\u0BCD\u0B95\u0BB3\u0BCD',
         searching: '\u0BA4\u0BC7\u0B9F\u0BC1\u0B95\u0BBF\u0BB1\u0BA4\u0BC1...',
-        matchingDonors: '\u0B87\u0BB0\u0BCd\u0BA4\u0BCd\u0B9F \u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF\u0B95\u0BB3\u0BCD \u0B95\u0BA3\u0BCd\u0B9F\u0BC1\u0BB1\u0BBE\u0BB0\u0BCD',
-        noMatch: '\u0B87\u0BB0\u0BCd\u0BA4\u0BCd\u0B9F \u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF\u0B95\u0BB3\u0BCD \u0B95\u0BA3\u0BCd\u0B9F\u0BC1\u0B95\u0BB2\u0BCD',
-        noMatchSub: '\u0BA4\u0BC7\u0B9F\u0BC1 \u0BAA\u0BB0\u0BBF\u0BAF\u0BB2\u0BCD \u0BB5\u0BBF\u0BB8\u0BCD\u0BA4\u0BBE\u0BB0\u0BBF\u0BA9\u0BBF \u0B9A\u0BC6\u0BAF\u0BB2\u0BCD.',
-        noRequests: '\u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95\u0B9F\u0BCD\u0B9F\u0BBF \u0B8E\u0BC3\u0BCD\u0BB5\u0BC1 \u0B9A\u0BC7\u0BB0\u0BCD\u0BAE\u0BC1.',
-        unableLoad: '\u0B85\u0BB5\u0B9A\u0BAF \u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95\u0B9F\u0BCD\u0B9F\u0BBF\u0B95\u0BB3\u0BCD \u0B8F\u0BB1\u0BCd\u0B9A\u0BC1\u0BAE\u0BB8\u0BCd\u0B9F\u0BBF\u0BAF\u0B9F\u0BC1.',
-        errorFinding: '\u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF\u0B95\u0BB3\u0BCD \u0BA4\u0BC7\u0B9F\u0BC1\u0B95\u0BBF\u0BB1\u0BA4\u0BC1\u0BB5\u0B9F\u0B9F\u0BBF\u0BB2\u0BCD \u0BAA\u0BBF\u0BB4\u0BC6.',
-        available: '\u0B95\u0BBF\u0B9F\u0BCd\u0BAA\u0BBF\u0B9F\u0BCD \u0B87\u0BB0\u0BC1\u0B99\u0BCd\u0B95\u0BBF\u0BB3\u0BCD',
+        matchingDonors: '\u0BAA\u0BCA\u0BB0\u0BC1\u0BA4\u0BCD\u0BA4\u0BAE\u0BBE\u0BA9 \u0BA4\u0BBE\u0BA9\u0BA4\u0BBE\u0BB0\u0BB0\u0BCD\u0B95\u0BB3\u0BCD',
+        noMatch: '\u0BAA\u0BCA\u0BB0\u0BC1\u0BA4\u0BCD\u0BA4\u0BAE\u0BBE\u0BA9 \u0B87\u0BB0\u0BA4\u0BCD\u0BA4 \u0BA4\u0BBE\u0BA9\u0BA4\u0BBE\u0BB0\u0BB0\u0BCD\u0B95\u0BB3\u0BCD \u0B95\u0BBF\u0B9F\u0BC8\u0B95\u0BCD\u0B95\u0BB5\u0BBF\u0BB2\u0BCD\u0BB2\u0BC8.',
+        noMatchSub: '\u0BA4\u0BC7\u0B9F\u0BB2\u0BCD \u0BAA\u0BB0\u0BAA\u0BCD\u0BAA\u0BC8 \u0BB5\u0BBF\u0BB0\u0BBF\u0BB5\u0BC1\u0BAA\u0B9F\u0BC1\u0BA4\u0BCD\u0BA4\u0BBF \u0BAE\u0BC1\u0BAF\u0BB1\u0BCD\u0B9A\u0BBF\u0B95\u0BCD\u0B95\u0BB5\u0BC1\u0BAE\u0BCD.',
+        noRequests: '\u0B85\u0BB5\u0B9A\u0BB0 \u0B95\u0BCB\u0BB0\u0BBF\u0B95\u0BCD\u0B95\u0BC8\u0B95\u0BB3\u0BCD \u0B8E\u0BA4\u0BC1\u0BB5\u0BC1\u0BAE\u0BCD \u0B87\u0BB2\u0BCD\u0BB2\u0BC8.',
+        unableLoad: '\u0B85\u0BB5\u0B9A\u0BB0 \u0B95\u0BCB\u0BB0\u0BBF\u0B95\u0BCD\u0B95\u0BC8\u0B95\u0BB3\u0BC8 \u0B8F\u0BB1\u0BCD\u0BB1 \u0BAE\u0BC1\u0B9F\u0BBF\u0BAF\u0BB5\u0BBF\u0BB2\u0BCD\u0BB2\u0BC8.',
+        errorFinding: '\u0BA4\u0BBE\u0BA9\u0BA4\u0BBE\u0BB0\u0BB0\u0BCD\u0B95\u0BB3\u0BC8\u0BA4\u0BCD \u0BA4\u0BC7\u0B9F\u0BC1\u0BB5\u0BA4\u0BBF\u0BB2\u0BCD \u0BAA\u0BBF\u0BB4\u0BC8 \u0B8F\u0BB1\u0BCD\u0BAA\u0B9F\u0BCD\u0B9F\u0BA4\u0BC1.',
+        available: '\u0B95\u0BBF\u0B9F\u0BC8\u0B95\u0BCD\u0B95\u0BBF\u0BB1\u0BA4\u0BC1',
+        unavailable: '\u0B95\u0BBF\u0B9F\u0BC8\u0B95\u0BCD\u0B95\u0BB5\u0BBF\u0BB2\u0BCD\u0BB2\u0BC8',
         distance: '\u0BA4\u0BC2\u0BB0\u0BAE\u0BCD',
         km: '\u0B95\u0BBF.\u0BAE\u0BC0.',
-        away: '\u0B9A\u0BBF\u0BB2\u0BB5\u0BB0\u0BBE\u0BAF\u0BCD',
-        callBtn: '\u0B85\u0BCD\u0BB4\u0BBF\u0B9F\u0BC1',
-        backLink: '\u2190 \u0B8E\u0BB5\u0BB8\u0BBF\u0B95\u0BCD \u0BA4\u0BBF\u0BB0\u0BC1\u0B99\u0BCd\u0B95',
-        patient: '\u0BA8\u0BCB\u0B9F\u0BCd\u0B9F \u0BAA\u0BC6\u0BB0\u0BCD\u0BA4\u0BBE\u0BB0\u0BCD',
-        blood: '\u0B87\u0BB0\u0BCd\u0BA4\u0BCd\u0B9F\u0BCD',
-        loc: '\u0B87\u0B9F\u0BCd\u0BAA\u0BBF\u0BA4\u0BCd\u0BA4\u0BAE\u0BCD',
-        hosp: '\u0BAE\u0BB0\u0BC1\u0BA4\u0BCd\u0BA4\u0BB5\u0BBE\u0B9A\u0B9A\u0BBE\u0BB2\u0BCD',
-        contact: '\u0BA4\u0BCA\u0BB2\u0BC8',
-        prio: '\u0BAE\u0BC1\u0B9F\u0BCB\u0BB1\u0BCd\u0BB1\u0B9F\u0BBF\u0BA9\u0BCD',
-        status: '\u0BA8\u0B9F\u0BCd\u0BAA\u0BBE\u0BA9\u0BCD\u0BA4\u0BCD\u0BA9\u0BCD\u0BAE\u0BCD',
-        bnHome: '\u0B8E\u0BB5\u0BB8\u0BBF',
-        bnEmg: '\u0B85\u0BB5\u0B9A\u0BB0',
-        bnDonor: '\u0B89\u0BB1\u0BC1\u0BA4\u0BCd\u0BA4\u0BBF',
-        bnFind: '\u0BA4\u0BC7\u0B9F\u0BC1',
-        bnDash: '\u0BAA\u0BBF\u0BB1\u0BC1\u0BAE\u0BBE\u0BB0\u0B99\u0BCd\u0B95\u0BB3\u0BCD',
-        reqPrefix: '\u0B9A\u0BCA\u0BB2\u0BCd\u0BB2\u0BC1\u0B99\u0BCd\u0B95 #'
+        away: '\u0BA4\u0BC2\u0BB0\u0BAE\u0BCD',
+        callBtn: '\u0BA4\u0BBE\u0BB3\u0BC0\u0BAA\u0BC7\u0B9A\u0BBF',
+        backLink: '\u2190 \u0BAE\u0BC1\u0B95\u0BAA\u0BCD\u0BAA\u0BC1\u0B95\u0BCD\u0B95\u0BC1\u0BA4\u0BCD \u0BA4\u0BBF\u0BB0\u0BC1\u0BAE\u0BCD\u0BAA\u0BC1',
+        patient: '\u0BA8\u0BCB\u0BAF\u0BBE\u0BB3\u0BBF',
+        blood: '\u0B87\u0BB0\u0BA4\u0BCD\u0BA4 \u0BB5\u0B95\u0BC8',
+        loc: '\u0B87\u0BB0\u0BC1\u0BAA\u0BCD\u0BAA\u0BBF\u0B9F\u0BAE\u0BCD',
+        hosp: '\u0BAE\u0BB0\u0BC1\u0BA4\u0BCD\u0BA4\u0BB5\u0BAE\u0BA9\u0BC8',
+        contact: '\u0BA4\u0BCA\u0B9F\u0BB0\u0BCD\u0BAA\u0BC1 \u0B8E\u0BA3\u0BCD',
+        prio: '\u0BAE\u0BC1\u0BA9\u0BCD\u0BA9\u0BC1\u0BB0\u0BBF\u0BAE\u0BC8',
+        status: '\u0BA8\u0BBF\u0BB2\u0BC8',
+        bnHome: '\u0BAE\u0BC1\u0B95\u0BAA\u0BCD\u0BAA\u0BC1',
+        bnEmg: '\u0B85\u0BB5\u0B9A\u0BB0\u0BAE\u0BCD',
+        bnDonor: '\u0BA4\u0BBE\u0BA9\u0BA4\u0BBE\u0BB0\u0BB0\u0BCD',
+        bnFind: '\u0BA4\u0BC7\u0B9F\u0BB2\u0BCD',
+        bnDash: '\u0BAA\u0BB3\u0BBF\u0BB5\u0BB3\u0BB3\u0BB3\u0BB3\u0BB3\u0BB3\u0BB3\u0BCD\u0B95\u0BB3\u0BCD',
+        reqPrefix: '\u0B95\u0BCB\u0BB0\u0BBF\u0B95\u0BCD\u0B95\u0BC8 #',
+        findNearbyBtn: '\uD83D\uDCCD \u0B85\u0BB0\u0BC1\u0B95\u0BBF\u0BB2\u0BC1\u0BB3\u0BCD\u0BB3 \u0B87\u0BB0\u0BA4\u0BCD\u0BA4 \u0BB5\u0B99\u0BCD\u0B95\u0BBF\u0B95\u0BB3\u0BC8\u0B95\u0BCD \u0B95\u0BA3\u0BCD\u0B9F\u0BB1\u0BBF\u0BAF\u0BC1\u0B99\u0BCD\u0B95\u0BB3\u0BCD',
+        locating: '\u0B87\u0BB0\u0BC1\u0BAA\u0BCD\u0BAA\u0BBF\u0B9F\u0BA4\u0BCD\u0BA4\u0BC8\u0BAA\u0BCD \u0BAA\u0BC6\u0BB1\u0BC1\u0B95\u0BBF\u0BB1\u0BA4\u0BC1...',
+        nearbyOpening: 'Google Maps \u0BA4\u0BBF\u0BB1\u0B95\u0BCD\u0B95\u0BBF\u0BB1\u0BA4\u0BC1...',
+        gpsNotSupported: '\u0B87\u0BA8\u0BCD\u0BA4 \u0B89\u0BB2\u0BBE\u0BB5\u0BBF\u0BAF\u0BBF\u0BB2\u0BCD \u0B87\u0BB0\u0BC1\u0BAA\u0BCD\u0BAA\u0BBF\u0B9F \u0B9A\u0BC7\u0BB5\u0BC8 \u0B86\u0BA4\u0BB0\u0BB5\u0BC1 \u0B87\u0BB2\u0BCD\u0BB2\u0BC8.',
+        gpsPermDenied: '\u0B87\u0BB0\u0BC1\u0BAA\u0BCD\u0BAA\u0BBF\u0B9F \u0B85\u0BA9\u0BC1\u0BAE\u0BA4\u0BBF \u0BAE\u0BB1\u0BC1\u0B95\u0BCD\u0B95\u0BAA\u0BCD\u0BAA\u0B9F\u0BCD\u0B9F\u0BA4\u0BC1. \u0B85\u0BAE\u0BC8\u0BAA\u0BCD\u0BAA\u0BC1\u0B95\u0BB3\u0BBF\u0BB2\u0BCD \u0B85\u0BA9\u0BC1\u0BAE\u0BA4\u0BBF\u0B95\u0BCD\u0B95\u0BB5\u0BC1\u0BAE\u0BCD.',
+        gpsUnavailable: '\u0B87\u0BB0\u0BC1\u0BAA\u0BCD\u0BAA\u0BBF\u0B9F\u0BAE\u0BCD \u0B95\u0BBF\u0B9F\u0BC8\u0B95\u0BCD\u0B95\u0BB5\u0BBF\u0BB2\u0BCD\u0BB2\u0BC8. \u0BAE\u0BC0\u0BA3\u0BCD\u0B9F\u0BC1\u0BAE\u0BCD \u0BAE\u0BC1\u0BAF\u0BB1\u0BCD\u0B9A\u0BBF\u0B95\u0BCD\u0B95\u0BB5\u0BC1\u0BAE\u0BCD.',
+        gpsTimeout: '\u0B87\u0BB0\u0BC1\u0BAA\u0BCD\u0BAA\u0BBF\u0B9F \u0B95\u0BCB\u0BB0\u0BBF\u0B95\u0BCD\u0B95\u0BC8 \u0BA8\u0BC7\u0BB0\u0BAE\u0BCD \u0BAE\u0BC1\u0B9F\u0BBF\u0BA8\u0BCD\u0BA4\u0BA4\u0BC1.',
+        gpsDefault: '\u0B87\u0BB0\u0BC1\u0BAA\u0BCD\u0BAA\u0BBF\u0B9F\u0BA4\u0BCD\u0BA4\u0BC8\u0B95\u0BCD \u0B95\u0BA3\u0BCD\u0B9F\u0BB1\u0BBF\u0BAF \u0BAE\u0BC1\u0B9F\u0BBF\u0BAF\u0BB5\u0BBF\u0BB2\u0BCD\u0BB2\u0BC8.',
+        banksTitle: '\u0B85\u0BB0\u0BC1\u0B95\u0BBF\u0BB2\u0BC1\u0BB3\u0BCD\u0BB3 \u0B87\u0BB0\u0BA4\u0BCD\u0BA4 \u0BB5\u0B99\u0BCD\u0B95\u0BBF\u0B95\u0BB3\u0BCD',
+        searchingBanks: '\u0B85\u0BB0\u0BC1\u0B95\u0BBF\u0BB2\u0BC1\u0BB3\u0BCD\u0BB3 \u0B87\u0BB0\u0BA4\u0BCD\u0BA4 \u0BB5\u0B99\u0BCD\u0B95\u0BBF\u0B95\u0BB3\u0BC8\u0B95\u0BCD \u0BA4\u0BC7\u0B9F\u0BC1\u0B95\u0BBF\u0BB1\u0BA4\u0BC1...',
+        noBanks: '10 \u0B95\u0BBF.\u0BAE\u0BC0. \u0B9A\u0BC1\u0BB1\u0BCD\u0BB1\u0BB3\u0BB5\u0BBF\u0BB2\u0BCD \u0B87\u0BB0\u0BA4\u0BCD\u0BA4 \u0BB5\u0B99\u0BCD\u0B95\u0BBF\u0B95\u0BB3\u0BCD \u0B8E\u0BA4\u0BC1\u0BB5\u0BC1\u0BAE\u0BCD \u0B95\u0BBF\u0B9F\u0BC8\u0B95\u0BCD\u0B95\u0BB5\u0BBF\u0BB2\u0BCD\u0BB2\u0BC8.',
+        noBanksSub: '\u0BAA\u0BBF\u0BA9\u0BCD\u0BA9\u0BB0\u0BCD \u0BAE\u0BC0\u0BA3\u0BCD\u0B9F\u0BC1\u0BAE\u0BCD \u0BAE\u0BC1\u0BAF\u0BB1\u0BCD\u0B9A\u0BBF\u0B95\u0BCD\u0B95\u0BB5\u0BC1\u0BAE\u0BCD \u0B85\u0BB2\u0BCD\u0BB2\u0BA4\u0BC1 Google Maps-\u0B90 \u0B9A\u0BB0\u0BBF\u0BAA\u0BBE\u0BB0\u0BCD\u0B95\u0BCD\u0B95\u0BB5\u0BC1\u0BAE\u0BCD.',
+        overpassError: '\u0B87\u0BB0\u0BA4\u0BCD\u0BA4 \u0BB5\u0B99\u0BCD\u0B95\u0BBF\u0B95\u0BB3\u0BC8\u0BAA\u0BCD \u0BAA\u0BC6\u0BB1 \u0BAE\u0BC1\u0B9F\u0BBF\u0BAF\u0BB5\u0BBF\u0BB2\u0BCD\u0BB2\u0BC8. \u0BAE\u0BC0\u0BA3\u0BCD\u0B9F\u0BC1\u0BAE\u0BCD \u0BAE\u0BC1\u0BAF\u0BB1\u0BCD\u0B9A\u0BBF\u0B95\u0BCD\u0B95\u0BB5\u0BC1\u0BAE\u0BCD.',
+        bankNameDefault: '\u0B87\u0BB0\u0BA4\u0BCD\u0BA4 \u0BB5\u0B99\u0BCD\u0B95\u0BBF',
+        addressNotAvailable: '\u0BAE\u0BC1\u0B95\u0BB5\u0BB0\u0BBF \u0B95\u0BBF\u0B9F\u0BC8\u0B95\u0BCD\u0B95\u0BB5\u0BBF\u0BB2\u0BCD\u0BB2\u0BC8',
+        openInMaps: 'Google Maps-\u0B87\u0BB2\u0BCD \u0BA4\u0BBF\u0BB1\u0B95\u0BCD\u0B95\u0BB5\u0BC1\u0BAE\u0BCD'
     }
 };
 
@@ -302,6 +406,7 @@ function setLang(lang) {
     document.getElementById('langEn').classList.toggle('active', lang === 'en');
     document.getElementById('langTa').classList.toggle('active', lang === 'ta');
     applyLang();
+    loadRequests();
 }
 
 function applyLang() {
@@ -314,6 +419,157 @@ function applyLang() {
     document.getElementById('bnDonor').textContent = t.bnDonor;
     document.getElementById('bnFind').textContent = t.bnFind;
     document.getElementById('bnDash').textContent = t.bnDash;
+    var nearbyBtn = document.getElementById('nearbyBtn');
+    if (nearbyBtn && !nearbyBtn.disabled) nearbyBtn.textContent = t.findNearbyBtn;
+}
+
+var banksCache = {};
+var banksCacheTime = {};
+var isFetchingBanks = false;
+
+function haversineBanks(lat1, lon1, lat2, lon2) {
+    var R = 6371;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLon = (lon2 - lon1) * Math.PI / 180;
+    var a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+function formatBankAddress(tags) {
+    if (!tags) return '';
+    if (tags['addr:full']) return tags['addr:full'];
+    var parts = [];
+    if (tags['addr:street']) parts.push(tags['addr:street']);
+    if (tags['addr:housenumber']) parts.push(tags['addr:housenumber']);
+    if (tags['addr:city']) parts.push(tags['addr:city']);
+    if (tags['addr:postcode']) parts.push(tags['addr:postcode']);
+    if (tags['addr:state']) parts.push(tags['addr:state']);
+    return parts.join(', ');
+}
+function openBankInMaps(lat, lng) {
+    var url = 'https://www.google.com/maps/search/?api=1&query=' + lat + ',' + lng;
+    window.open(url, '_blank');
+}
+function renderBanks(banks, userLat, userLng) {
+    var t = T[curLang];
+    var container = document.getElementById('banksResults');
+    container.innerHTML = '';
+    if (!banks || banks.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">\uD83C\uDFE5</div><div class="empty-state-text">' + t.noBanks + '</div><div class="empty-state-sub">' + t.noBanksSub + '</div></div>';
+        return;
+    }
+    var title = document.createElement('div');
+    title.className = 'banks-title';
+    title.textContent = t.banksTitle + ' (' + banks.length + ')';
+    container.appendChild(title);
+    banks.forEach(function(b) {
+        var card = document.createElement('div');
+        card.className = 'bank-card';
+        var name = b.name ? escapeHtml(b.name) : t.bankNameDefault;
+        var addr = b.address ? escapeHtml(b.address) : t.addressNotAvailable;
+        var dist = b.distanceKm !== null ? b.distanceKm.toFixed(1) + ' ' + t.km : '';
+        card.innerHTML =
+            '<div class="bank-header"><div class="bank-name">\uD83C\uDFE5 ' + name + '</div></div>' +
+            '<div class="bank-address">' + addr + '</div>' +
+            '<div class="bank-meta">' +
+                (dist ? '<span class="bank-tag distance">\uD83D\uDCCD ' + dist + ' ' + t.away + '</span>' : '') +
+                '<span class="bank-tag coords">' + b.lat.toFixed(5) + ', ' + b.lon.toFixed(5) + '</span>' +
+            '</div>' +
+            '<a class="bank-open-btn" href="#" onclick="openBankInMaps(' + b.lat + ',' + b.lon + '); return false;">\uD83D\uDCCD ' + t.openInMaps + '</a>';
+        container.appendChild(card);
+    });
+}
+function findNearbyBanks() {
+    var t = T[curLang];
+    var btn = document.getElementById('nearbyBtn');
+    var status = document.getElementById('nearbyStatus');
+    var results = document.getElementById('banksResults');
+    if (isFetchingBanks) return;
+    if (!navigator.geolocation) {
+        status.textContent = t.gpsNotSupported;
+        status.className = 'nearby-status error';
+        return;
+    }
+    btn.disabled = true;
+    btn.textContent = t.locating;
+    status.textContent = t.locating;
+    status.className = 'nearby-status';
+    results.innerHTML = '<div class="loading"><div class="spinner"></div><p style="margin-top:8px">' + t.searchingBanks + '</p></div>';
+    navigator.geolocation.getCurrentPosition(
+        function(pos) {
+            var lat = pos.coords.latitude;
+            var lng = pos.coords.longitude;
+            var cacheKey = lat.toFixed(3) + ',' + lng.toFixed(3);
+            var now = Date.now();
+            if (banksCache[cacheKey] && (now - banksCacheTime[cacheKey] < 300000)) {
+                var cached = banksCache[cacheKey];
+                status.textContent = '';
+                status.className = 'nearby-status';
+                btn.disabled = false;
+                btn.textContent = t.findNearbyBtn;
+                renderBanks(cached, lat, lng);
+                return;
+            }
+            var query = '[out:json][timeout:25];(nwr["healthcare"="blood_bank"](around:10000,' + lat + ',' + lng + ');nwr["healthcare"="blood_donation"](around:10000,' + lat + ',' + lng + '););out center 20;';
+            var url = 'https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query);
+            isFetchingBanks = true;
+            status.textContent = t.searchingBanks;
+            fetch(url)
+                .then(function(resp) {
+                    if (!resp.ok) throw new Error('Overpass error ' + resp.status);
+                    return resp.json();
+                })
+                .then(function(data) {
+                    var elements = data.elements || [];
+                    var banks = [];
+                    elements.forEach(function(el) {
+                        var bLat = el.lat || (el.center && el.center.lat);
+                        var bLon = el.lon || (el.center && el.center.lon);
+                        if (bLat == null || bLon == null) return;
+                        var tags = el.tags || {};
+                        var name = tags.name || tags['operator'] || '';
+                        var address = formatBankAddress(tags);
+                        var dist = haversineBanks(lat, lng, bLat, bLon);
+                        banks.push({ name: name, address: address, lat: bLat, lon: bLon, distanceKm: dist });
+                    });
+                    banks.sort(function(a,b){ return a.distanceKm - b.distanceKm; });
+                    banksCache[cacheKey] = banks;
+                    banksCacheTime[cacheKey] = now;
+                    status.textContent = '';
+                    status.className = 'nearby-status';
+                    renderBanks(banks, lat, lng);
+                })
+                .catch(function(err) {
+                    status.textContent = t.overpassError;
+                    status.className = 'nearby-status error';
+                    results.innerHTML = '<div class="empty-state"><div class="empty-state-icon">\u26A0\uFE0F</div><div class="empty-state-text">' + t.overpassError + '</div></div>';
+                })
+                .finally(function(){
+                    isFetchingBanks = false;
+                    btn.disabled = false;
+                    btn.textContent = t.findNearbyBtn;
+                });
+        },
+        function(err) {
+            var msg = '';
+            switch(err.code) {
+                case 1: msg = t.gpsPermDenied; break;
+                case 2: msg = t.gpsUnavailable; break;
+                case 3: msg = t.gpsTimeout; break;
+                default: msg = t.gpsDefault;
+            }
+            status.textContent = msg;
+            status.className = 'nearby-status error';
+            results.innerHTML = '';
+            btn.disabled = false;
+            btn.textContent = t.findNearbyBtn;
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
 }
 
 async function loadRequests() {
