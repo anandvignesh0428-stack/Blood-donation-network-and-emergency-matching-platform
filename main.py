@@ -4,10 +4,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 import math
+import os
+from pathlib import Path
 
 from database import engine, Base, get_db, run_safe_migration
 import models
 from schemas import DonorCreate, EmergencyRequestCreate
+
+# Project-relative paths: works locally and on Vercel serverless
+# (never hardcode machine-specific absolute paths).
+BASE_DIR = Path(__file__).resolve().parent
+TEMPLATES_DIR = BASE_DIR / "templates"
 
 # Safe idempotent migration before table creation - protects existing data
 run_safe_migration()
@@ -65,16 +72,28 @@ app = FastAPI(
 )
 
 
+# Frontend and API are served from the same deployment (same origin),
+# so browsers do not need CORS for the built-in UI. Extra origins can be
+# allowed via the FRONTEND_ORIGINS env var (comma-separated) if ever needed.
+FRONTEND_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("FRONTEND_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=FRONTEND_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-Base.metadata.create_all(bind=engine)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as exc:  # don't crash import (serverless cold start) on DB hiccup
+    print(f"WARNING: could not ensure database tables exist: {exc}")
 
 
 # =========================
@@ -83,7 +102,7 @@ Base.metadata.create_all(bind=engine)
 
 @app.get("/", response_class=HTMLResponse)
 def home():
-    with open("templates/index.html", "r", encoding="utf-8") as file:
+    with open(TEMPLATES_DIR / "index.html", "r", encoding="utf-8") as file:
         return file.read()
 
 
@@ -93,7 +112,7 @@ def home():
 
 @app.get("/donor", response_class=HTMLResponse)
 def donor_page():
-    with open("templates/donor.html", "r", encoding="utf-8") as file:
+    with open(TEMPLATES_DIR / "donor.html", "r", encoding="utf-8") as file:
         return file.read()
 
 
@@ -103,7 +122,7 @@ def donor_page():
 
 @app.get("/emergency", response_class=HTMLResponse)
 def emergency_page():
-    with open("templates/emergency.html", "r", encoding="utf-8") as file:
+    with open(TEMPLATES_DIR / "emergency.html", "r", encoding="utf-8") as file:
         return file.read()
 
 
@@ -113,7 +132,7 @@ def emergency_page():
 
 @app.get("/matching", response_class=HTMLResponse)
 def matching_page():
-    with open("templates/matching.html", "r", encoding="utf-8") as file:
+    with open(TEMPLATES_DIR / "matching.html", "r", encoding="utf-8") as file:
         return file.read()
 
 
@@ -123,7 +142,7 @@ def matching_page():
 
 @app.get("/dashboard", response_class=HTMLResponse)
 def dashboard_page():
-    with open("templates/dashboard.html", "r", encoding="utf-8") as file:
+    with open(TEMPLATES_DIR / "dashboard.html", "r", encoding="utf-8") as file:
         return file.read()
 
 
@@ -414,7 +433,7 @@ def update_emergency_status(
     if not emergency_request:
         return {"message": "Emergency request not found"}
 
-    allowed_status = ["Pending", "Matched", "Completed"]
+    allowed_status = ["Pending", "Matched", "Completed", "Cancelled"]
 
     if status not in allowed_status:
         return {"message": "Invalid status"}

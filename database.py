@@ -12,11 +12,20 @@ DB_PATH = os.path.join(BASE_DIR, "blood_donation.db")
 
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DB_PATH}")
 
+# Some managed-Postgres providers issue "postgres://..." URLs.
+# SQLAlchemy 2.x expects "postgresql://...", so normalize the scheme.
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = "postgresql://" + DATABASE_URL[len("postgres://"):]
+
 engine_kwargs = {}
-if DATABASE_URL.startswith("mysql"):
-    engine_kwargs = {"pool_pre_ping": True, "pool_recycle": 3600}
-else:
+if DATABASE_URL.startswith("sqlite"):
+    # SQLite (local dev only). check_same_thread=False is SQLite-specific
+    # and must NOT be passed to MySQL/PostgreSQL drivers.
     engine_kwargs = {"connect_args": {"check_same_thread": False}}
+else:
+    # Server-based databases (MySQL locally, PostgreSQL on Vercel):
+    # recycle stale pooled connections common on serverless/managed DBs.
+    engine_kwargs = {"pool_pre_ping": True, "pool_recycle": 3600}
 
 engine = create_engine(
     DATABASE_URL,
@@ -39,8 +48,8 @@ def get_db():
 
 def run_safe_migration():
     """Idempotent migration: only add missing columns, never drop or delete data.
-    Only runs for SQLite databases."""
-    if DATABASE_URL.startswith("mysql"):
+    Only runs for SQLite databases (local dev)."""
+    if not DATABASE_URL.startswith("sqlite"):
         return
     if not os.path.exists(DB_PATH):
         return
